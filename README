@@ -52,15 +52,9 @@ on-disk files.  Everything else is an in-memory data structure.
 Download
 ========
 
-- `pyScore-0.1.tar.bz2 <pyScore-0.1.tar.bz2>`_ (137551 bytes)
-- `pyScore-0.1.tar.gz <pyScore-0.1.tar.gz>`_ (168512 bytes)
-- `pyScore-0.1.zip <pyScore-0.1.zip>`_ (266649 bytes)
-- `pyScore-0.2.tar.bz2 <pyScore-0.2.tar.bz2>`_ (151250 bytes)
-- `pyScore-0.2.tar.gz <pyScore-0.2.tar.gz>`_ (185155 bytes)
-- `pyScore-0.2.zip <pyScore-0.2.zip>`_ (287853 bytes)
-- `pyScore-0.3.tar.bz2 <pyScore-0.3.tar.bz2>`_ (151300 bytes)
-- `pyScore-0.3.tar.gz <pyScore-0.3.tar.gz>`_ (185229 bytes)
-- `pyScore-0.3.zip <pyScore-0.3.zip>`_ (287881 bytes)
+- `pyScore-0.4.0.tar.bz2 <pyScore-0.4.0.tar.bz2>`_ (148007 bytes)
+- `pyScore-0.4.0.tar.gz <pyScore-0.4.0.tar.gz>`_ (182185 bytes)
+- `pyScore-0.4.0.zip <pyScore-0.4.0.zip>`_ (287571 bytes)
 
 
 You can also `browse the CVS`__.
@@ -70,7 +64,7 @@ You can also `browse the CVS`__.
 Release Notes
 =============
 
-Pertaining to latest release (0.3):
+Pertaining to latest release (0.4.0):
 
 Notes
 -----
@@ -95,11 +89,9 @@ Notes
 
 - In GUIDO, barlines are "global": i.e. they affect all parts.  Therefore, we merge all barlines, but warn if there are barlines in subsequent parts that do not match those in the previous parts. [guido_to_musicxml.py]
 
-- Cross-staff beaming doesn't seem to convert from Guido to MusicXML [guido_to_musicxml.py]
-
 - Guido doesn't have named parts like MusicXML, so we grab it from the \\instrument tag [guido_to_musicxml.py]
 
-- Measures out-of-order (using arguments to the \\beam tag) in Guido are treated as in-order [guido_to_musicxml.py]
+- Measures out-of-order (using arguments to the \\bar tag) in Guido are treated as being in file ordering [guido_to_musicxml.py]
 
 - accelerandos/ritardandos are output to MusicXML as text only (i.e. no actual tempo changes) [guido_to_musicxml.py]
 
@@ -143,10 +135,6 @@ Bugs or shortcomings in other systems
 To-dos
 ------
 
-- add support for custom namespace resolvers/default namespaces [ElementTree.py]
-
-- add support for incremental parsing [ElementTree.py]
-
 - check that we have ``xmllint`` and use it [validate.py]
 
 - document GuidoToMusicXML.make_plan because it's really hairy [guido_to_musicxml.py]
@@ -158,6 +146,10 @@ To-dos
 - MusicXML -> Guido ornament handling [musicxml_to_guido.py]
 
 - check that we have ``xmllint`` and use it [validate.py]
+
+- add support for custom namespace resolvers/default namespaces [ElementTree.py]
+
+- add support for incremental parsing [ElementTree.py]
 
 Longer-term plans
 -----------------
@@ -195,18 +187,21 @@ To build and install this package, use the regular Python distutils
 method::
 
   python setup.py build
-  python setup.py install
+  sudo python setup.py install
 
 If you do not have a compiler available, you can use the
 ``--no-compiler`` build flag.  pyScore will still work, but will run
 much slower::
 
   python setup.py build --no-compiler
-  python setup.py install
+  sudo python setup.py install
 
 On Mac OS-X, you probably want to install the scripts somewhere reasonable::
 
-  python setup.py install --install-scripts=/usr/local/bin
+  sudo python setup.py install --install-scripts=/usr/local/bin
+
+If you don't already have ``/usr/local/bin/`` on your PATH, you may
+want to add it.
 
 Binary installers
 -----------------
