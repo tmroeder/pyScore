@@ -18,6 +18,7 @@ Copyright (C) 2004 Michael Droettboom
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+from pyScore.config import config
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic import all as basic
 from pyScore.Guido.objects.advanced import all as advanced
@@ -27,30 +28,39 @@ from pyScore.__version__ import *
 
 from guido_to_musicxml import GuidoToMusicXML
 from musicxml_to_guido import MusicXMLToGuido
+from validate import validate
 
-from types import StringType, UnicodeType
+from types import *
 
-def guido_tree_to_musicxml_tree(score, warnings=False, verbose=False):
+config.add_option("", "--xml-encoding", action="store", default="us-ascii", help="[xml] The encoding to save XML files.")
+config.add_option("", "--dtd", action="store_true", help="[xml] validate against a DTD.")
+
+def Guido_tree_to_MusicXML_tree(score):
    assert isinstance(score, core.Score)
-   converter = GuidoToMusicXML(warnings=warnings, verbose=verbose)
+   converter = GuidoToMusicXML()
    return converter.convert(score)
 
-def musicxml_tree_to_musicxml_file(tree, filename=None, output_encoding="ascii"):
+def MusicXML_tree_to_MusicXML_file(tree, filename=None):
    assert iselement(tree)
+   output_encoding = config.get("xml_encoding")
    ElementTree(tree).write(FileWriter(
       filename, output_encoding),
                            output_encoding, created,
       '<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 1.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">')
+   if config.get("dtd"):
+      validate(filename)
 
-def musicxml_file_to_musicxml_tree(file):
+def MusicXML_file_to_MusicXML_tree(file):
+   if config.get("dtd") and type(file) in (StringType, UnicodeType):
+      validate(file)
    tree = parse(file)
    return tree.getroot()
 
-def musicxml_tree_to_guido_tree(tree, warnings=False, verbose=False):
+def MusicXML_tree_to_Guido_tree(tree):
    assert iselement(tree)
-   converter = MusicXMLToGuido((core, basic, advanced), warnings=warnings, verbose=verbose)
+   converter = MusicXMLToGuido((core, basic, advanced))
    return converter.convert(tree)
 
-inputs = ["guido_tree", "musicxml_tree", "musicxml_file"]
+inputs = ["Guido_tree", "MusicXML_tree", "MusicXML_file"]
 outputs = inputs
 

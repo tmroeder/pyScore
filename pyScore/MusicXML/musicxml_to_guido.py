@@ -20,21 +20,22 @@ Copyright (C) 2004 Michael Droettboom
 
 # PLAN: Finish support for conversion from MusicXML to Guido
 
-from pyScore.util.structures import *
+from pyScore.config import config
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic import all as basic
 from pyScore.Guido.objects.advanced import all as advanced
 from pyScore.Guido.tree_builder import GuidoTreeBuilder
 from pyScore.MusicXML.conversion_constants import *
+from pyScore.util.structures import *
 from pyScore.util.rational import Rat
 
 from pyScore.elementtree.ElementTree import iselement, tostring
 
 class MusicXMLToGuido:
-   def __init__(self, tags, warnings=True, verbose=False):
+   def __init__(self, tags):
       self._tags = tags
-      self._warnings = warnings
-      self._verbose = verbose
+      self._warnings = config.get("warnings")
+      self._verbose = config.get("verbose")
 
    def m2g_duration(self, duration, divisions):
       return Rat(1, 4) * Rat(1, divisions) * Rat(duration, 1)
@@ -47,6 +48,7 @@ class MusicXMLToGuido:
          self.notations = {}
          self.wedges = {}
          self.lyrics = None
+         self.voice = 1
 
    def convert(self, tree):
       # TODO: deal with time-wise MusicXML scores (e.g. use Michael Good's XSLT transform first)
@@ -146,6 +148,7 @@ class MusicXMLToGuido:
             voices_used.add(int(voice.text))
       state.first_voice = True
       for voice in voices_used.data:
+         state.voice = voice
          state.lyrics = None
          builder.begin_Sequence()
          if len(voices_used.data) > 1:
@@ -153,7 +156,7 @@ class MusicXMLToGuido:
          self.make_metadata(tree, builder, state)
          first = False
          for measure in part.findall("./measure"):
-            self.make_measure(measure, voice, builder, state)
+            self.make_measure(measure, builder, state)
          builder.end_Sequence()
          state.first_voice = False
          state.first_sequence = False
@@ -167,41 +170,35 @@ class MusicXMLToGuido:
                if creator.get("type") == type:
                   builder.add_Tag(type, None, (creator.text,))
 
-   def make_measure(self, measure, voice, builder, state):
+   def make_measure(self, measure, builder, state):
       # We sort each measure by absolute time so that things are in order
       # Also, we determine and set the Guido duration here so that we don't have
       # to deal with divisions tags later.
       time_spine = Rat(0, 1)
+      last_duration = Rat(0, 1)
+      elements = []
       for element in measure:
-         for divisions in element.findall(".//divisions"):
-            state.divisions = int(divisions.text)
+         if element.find("./chord") is None:
+            time_spine += last_duration
+         if element.tag == "attributes":
+            state.divisions = int(element.findtext("./divisions") or state.divisions)
          element.time_spine = time_spine
          element.guido_duration = Rat(0, 1)
-         duration = element.find("./duration")
+         duration = element.findtext("./duration")
          if element.tag == "backup":
-            time_spine -= self.m2g_duration(int(duration.text), state.divisions)
+            time_spine -= self.m2g_duration(int(duration), state.divisions)
          elif element.tag == "forward":
-            time_spine += self.m2g_duration(int(duration.text), state.divisions)
-         elif duration != None:
-            element.guido_duration = self.m2g_duration(int(duration.text), state.divisions)
-         if element.find("./chord") is None:
-            time_spine += element.guido_duration
+            time_spine += self.m2g_duration(int(duration), state.divisions)
+         else:
+            if duration != None:
+               element.guido_duration = self.m2g_duration(int(duration), state.divisions)
+            elements.append(element)
+         last_duration = element.guido_duration
       
-      # Filter notes and directions so we're only dealing with the current voice
-
-      # NOTE: Slurs are not converted from MusicXML to Guido, since slurs can start in one voice and end in another.  (This is not supported by Guido).
-      filtered = []
-      for element in measure:
-         if element.tag in ("note", "direction"):
-            voice_tag = element.findtext("./voice") or "1"
-            if int(voice_tag) == voice:
-                  filtered.append(element)
-         elif not element.tag in ("forward", "backup"):
-            filtered.append(element)
-      filtered.sort(lambda x, y: cmp(x.time_spine, y.time_spine))
+      elements.sort(lambda x, y: cmp(x.time_spine, y.time_spine))
 
       time_spine = Rat(0, 1)
-      for element in filtered:
+      for element in elements:
          if element.time_spine > time_spine:
             difference = element.time_spine - time_spine
             builder.add_Empty(difference.num, difference.den)
@@ -214,31 +211,36 @@ class MusicXMLToGuido:
 
    def element_note(self, element, builder, state):
       chord = element.find("./chord") != None
-      self.make_stems(element, builder, state)
-      if not chord:
-         self.begin_beam(element, builder, state)
-         self.begin_notations(element, builder, state)
-         self.begin_lyric(element, builder, state)
-      duration = element.guido_duration
-      pitch_tag = element.find("./pitch")
-      rest_tag = element.find("./rest")
-      if pitch_tag != None:
-         pitch_name = pitch_tag.findtext("./step").lower()
-         octave = int(pitch_tag.findtext("./octave")) - 3
-         accidental = m2g_accidental[int(pitch_tag.findtext("./alter") or "0")]
-         if chord:
-            note = builder.add_Event_to_Chord(pitch_name, octave, accidental,
-                                              duration.num, duration.den)
-         else:
-            note = builder.add_Event_not_in_Chord(pitch_name, octave, accidental,
+      voice_tag = int(element.findtext("./voice") or "1")
+      self.begin_range("./notations/slur", "slur", element, builder, state)
+      self.begin_range("./notations/tied", "tie", element, builder, state)
+      if state.voice == voice_tag:
+         if not chord:
+            self.begin_beam(element, builder, state)
+            self.begin_notations(element, builder, state)
+            self.begin_lyric(element, builder, state)
+         duration = element.guido_duration
+         pitch_tag = element.find("./pitch")
+         rest_tag = element.find("./rest")
+         if pitch_tag != None:
+            self.make_stems(element, builder, state)
+            pitch_name = pitch_tag.findtext("./step").lower()
+            octave = int(pitch_tag.findtext("./octave")) - 3
+            accidental = m2g_accidental[int(pitch_tag.findtext("./alter") or "0")]
+            if chord:
+               note = builder.add_Event_to_Chord(pitch_name, octave, accidental,
+                                                 duration.num, duration.den)
+            else:
+               note = builder.add_Event_not_in_Chord(pitch_name, octave, accidental,
                                                   duration.num, duration.den)
-      elif rest_tag != None:
-         note = builder.add_Event_not_in_Chord("_", num=duration.num, den=duration.den)
-
-      if not chord:
-         self.end_lyric(element, builder, state)
-         self.end_notations(element, builder, state)
-         self.end_beam(element, builder, state)
+         elif rest_tag != None:
+            note = builder.add_Event_not_in_Chord("_", num=duration.num, den=duration.den)
+         if not chord:
+            self.end_lyric(element, builder, state)
+            self.end_notations(element, builder, state)
+            self.end_beam(element, builder, state)
+      self.end_range("./notations/tied", "tie", element, builder, state)
+      self.end_range("./notations/slur", "slur", element, builder, state)
 
    def make_stems(self, element, builder, state):
       stem_direction = element.find("./stem")
@@ -277,8 +279,6 @@ class MusicXMLToGuido:
                         self.end_dynamic_callback, builder, state)
       self.end_notation(articulations, g2m_articulations,
                         self.end_articulation_callback, builder, state)
-      # self.begin_range("./notations/slur", "slur", note, builder, state)
-      self.begin_range("./notations/tied", "tie", note, builder, state)
       self.begin_notation(articulations, g2m_articulations,
                           self.begin_articulation_callback, builder, state)
       self.begin_notation(dynamics, acceptable_dynamic_names,
@@ -290,8 +290,6 @@ class MusicXMLToGuido:
    def end_notations(self, note, builder, state):
       self.single_notation(note, "./notations/fermata", self.end_fermata_callback, builder, state)
       self.single_notation(note, "./notations/technical/fingering", self.end_fingering_callback, builder, state)
-      self.end_range("./notations/tied", "tie", note, builder, state)
-      # self.end_range("./notations/slur", "slur", note, builder, state)
 
    def begin_lyric(self, element, builder, state):
       lyric = element.find("./lyric")
@@ -393,8 +391,7 @@ class MusicXMLToGuido:
       builder.add_Tag("key", None, (key,))
 
    def element_time(self, element, builder, state):
-      # NOTE: There is no way to represent <senza-misura> and type="single-number"
-      # in <time> tags in Guido
+      # NOTE: There is no way to represent <senza-misura> and type="single-number" for meters in Guido
       symbol = element.get('symbol', 'normal')
       if m2g_time_symbol.has_key(symbol):
          time = m2g_time_symbol[symbol]
@@ -459,10 +456,9 @@ class MusicXMLToGuido:
       builder.add_Tag("tempo", None, ("%d/%d%s=%d" % (beat_unit.num, beat_unit.den, dots, per_minute),))
 
    def element_words(self, element, builder, state):
-      # NOTE: There is a limited vocabulary of written directions that get converted from
-      # MusicXML to Guido.  This conversion is not very smart or robust.
+      # NOTE: There is a limited vocabulary of written directions that get converted from MusicXML to Guido.  This conversion is not very smart or robust.
 
-      # NOTE: Markings followed by dashes is not supported by MusicXML -> Guido
+      # NOTE: Markings followed by dashes are not supported by MusicXML -> Guido
       text = element.text.replace(".", "")
       if m2g_words.has_key(text):
          builder.add_Tag(m2g_words[text], None, ())

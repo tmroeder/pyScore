@@ -19,12 +19,15 @@ Copyright (C) 2002 Michael Droettboom
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 from pyScore.elementtree.ElementTree import Element, SubElement, tostring
+
+from pyScore.config import config
 from pyScore.util.structures import *
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic.staff import staff as staff_tag
 from pyScore.Guido.objects.basic.instrument import instrument as instrument_tag
 from pyScore.MusicXML.conversion_constants import *
 from pyScore.util.rational import Rat
+from pyScore.util.config import *
 
 import sys
 from types import *
@@ -32,6 +35,8 @@ from types import *
 # NOTE: MusicXML doesn't seem to have a way to support Guido \\headsReverse
 # NOTE: Guido \\noteFormat tag is completely unsupported
 # NOTE: Guido \\splitChord tag is completely unsupported
+
+config.add_option("", "--divisions", action="store", default=144, type="int")
 
 class ExtendedSequence(core.INLINE_COLLECTION):
    """This class stores a few more bits of information about Guido sequences
@@ -61,15 +66,15 @@ the Guido stream, such as stem direction..."""
          self.last_tuplet = None
          self.last_ending = None
 
+   def __init__(self):
+      self._divisions = config.get("divisions")
+      assert type(self._divisions) == IntType
+      self._quarter_divisions = self._divisions * 4
+      self._warnings = config.get("warnings")
+      self._verbose = config.get("verbose")
+
    def g2m_duration(self, d):
       return int((d.num * self._quarter_divisions) / d.den)
-   
-   def __init__(self, divisions=DIVISIONS, warnings=True, verbose=False):
-      assert type(divisions) == IntType
-      self._divisions = DIVISIONS
-      self._quarter_divisions = DIVISIONS * 4
-      self._warnings = warnings
-      self._verbose = verbose
 
    def convert(self, score):
       assert isinstance(score, core.Score)
@@ -89,7 +94,7 @@ the Guido stream, such as stem direction..."""
    def make_plan(self, score):
       # NOTE: In GUIDO, barlines are "global": i.e. they affect all parts.  Therefore, we merge all barlines, but warn if there are barlines in subsequent parts that do not match those in the previous parts.
 
-      # NOTE: Cross-staff beaming doesn't seem to work
+      # NOTE: Cross-staff beaming doesn't seem to convert from Guido to MusicXML
       
       # First we scan through all of the parts and sort by staff, and
       # keep track of where the barlines are
@@ -125,6 +130,7 @@ the Guido stream, such as stem direction..."""
             sys.stderr.write(
                "WARNING: In part %d, barlines do not line up with previous parts at %s" %
                (part_no, ", ".join([str(x) for x in barline_warnings])))
+
       staff_layout = Grouper()
       staves_to_sequences = {}
       for i, sequence in enumerate(sequences):
@@ -147,6 +153,7 @@ the Guido stream, such as stem direction..."""
          if len(seqs) > 1:
             for i, seq in enumerate(seqs):
                seq.voice = i + 1
+
       if self._verbose:
          print "Grouping sequences into parts:"
          print [[[x.number for x in y] for y in z] for z in staff_layout]
@@ -163,7 +170,7 @@ the Guido stream, such as stem direction..."""
             part_no += 1
 
    def make_parts(self, score_partwise, staff_layout, barlines):
-      # NOTE: Measures out-of-order in Guido are ignored
+      # NOTE: Measures out-of-order (using arguments to the \\beam tag) in Guido are treated as in-order
       used_sequences = []
       part_no = 1
       for i, group in enumerate(staff_layout):
@@ -444,7 +451,6 @@ the Guido stream, such as stem direction..."""
             first = False
 
    def make_ornaments(self, group, measure, state):
-      # NOTE: trills, turns and mordents are much less specific in MusicXML than in GUIDO, so pitch name (but not the accidental) of auxiliary notes are thrown out, as well as any duration for the ornament
       # EXT: ornaments don't seem to work in Turandot
       found_one = False
       for ornament in g2m_ornaments.keys():
@@ -472,6 +478,16 @@ the Guido stream, such as stem direction..."""
                   accidental_mark = SubElement(ornaments_element, "accidental-mark")
                   accidental_mark.text = str(core.PITCHED.accidentals_to_semitones[
                      second_note.accidental])
+               # Get interval between two notes
+               pitch1 = core.PITCHED.pitch_names_to_semitones[group.collection[0].pitch_name] % 12
+               pitch2 = core.PITCHED.pitch_names_to_semitones[group.collection[1].pitch_name] % 12
+               size = int(abs(pitch1 - pitch2))
+               if g2m_ornament_size.has_key(size):
+                  ornament_element.set("trill-sound", g2m_ornament_size[size])
+               else:
+                  ornament_element.set("trill-sound", "whole")
+            else:
+               ornament_element.set("trill-sound", "unison")
       return found_one
 
    # TAGS ########################################
@@ -625,9 +641,9 @@ the Guido stream, such as stem direction..."""
          SubElement(metronome, "beat-unit-dot")
       SubElement(metronome, "per-minute").text = str(tag.bpm)
       if tag.tempo_name != None:
-         direction_type = SubElement(direction, "directon-type")
+         direction_type = SubElement(direction, "direction-type")
          SubElement(direction_type, "words").text = tag.tempo_name
-      sound = SubElement(measure, "sound",
+      sound = SubElement(direction, "sound",
                          tempo = str(int((tag.bpm * 4 * tag.num) / tag.den)))
 
    def tag_accelerando(self, tag, measure, direction, state):
@@ -640,6 +656,7 @@ the Guido stream, such as stem direction..."""
       direction_type = SubElement(direction, "direction-type")
       SubElement(direction_type, "words").text = good_name
       if len(tag.events):
+         direction_type = SubElement(direction, "direction-type")
          SubElement(direction_type, "dashes", type="start")
    tag_ritardando = tag_accelerando
 

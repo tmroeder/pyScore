@@ -48,19 +48,25 @@ class ConverterGraph:
                   converters[converter] = None
                   self.inputs[input][output] = getattr(module, converter_name)
 
-   def get_steps(self, input, output, tried=[]):
-      steps = []
+   def _get_steps(self, input, output, tried=[]):
       if self.inputs[input].has_key(output):
          return [(self.inputs[input][output], input, output)]
       options = []
       for key, val in self.inputs[input].items():
          if key not in tried and self.inputs.has_key(key):
-            options.append(
-               [(val, input, key)] +
-               self.get_steps(key, output, tried + [input]))
+            option = self._get_steps(key, output, tried + [input])
+            if len(option) and option[-1][-1] == output:
+               options.append([(val, input, key)] + option)
       if len(options):
          options.sort(lambda x, y: cmp(len(x), len(y)))
          return options[0]
+      return []
+
+   def get_steps(self, input, output):
+      if self.inputs.has_key(input) and output in self.outputs:
+         steps = self._get_steps(input, output)
+         if len(steps):
+            return steps
       raise ValueError(
          "There is no way to convert '%s' to '%s'." % (input, output))
 
@@ -74,7 +80,16 @@ class ConverterGraph:
          progress_callback(float(i) / float(len(steps) - 1))
       return input
 
+   def make_dot_file(self, file):
+      file.write("digraph g {\n")
+      for input, val in self.inputs.items():
+         for output in val.keys():
+            file.write('"%s" -> "%s"\n' % (input.replace("_", " "), output.replace("_", " ")))
+      file.write("}\n")
+
 def convert(input_format, output_format, input, stream=sys.stdout, progress_callback=dummy_function, **kwargs):
    converter = ConverterGraph(modules)
    steps = converter.get_steps(input_format.convertor, output_format.convertor)
    return converter.run_steps(input, stream=stream, **kwargs)
+
+__all__ = "ConverterGraph convert".split()

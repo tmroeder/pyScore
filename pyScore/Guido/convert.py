@@ -18,6 +18,7 @@ Copyright (C) 2002 Michael Droettboom
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+from pyScore.config import config
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic import all as basic
 from pyScore.Guido.objects.advanced import all as advanced
@@ -33,32 +34,34 @@ from types import StringType, UnicodeType
 
 # NOTE: Guido is output with latin_1 encoding, because that seems to work with NoteServer
 
-def guido_file_to_guido_string(input, input_encoding="latin_1"):
-   input = FileReader(input, input_encoding)
+config.add_option("", "--guido-encoding", action="store", default="latin_1", help="[guido] The encoding for Guido files")
+
+def Guido_file_to_Guido_string(input):
+   input = FileReader(input, config.get("guido_encoding"))
    return input.read()
 
-def guido_string_to_guido_tree(s, warnings=False, trace=False):
+def Guido_string_to_Guido_tree(s):
    assert type(s) in (StringType, UnicodeType)
-   parser = GuidoParser((core, basic, advanced), warnings=warnings, trace=trace)
+   parser = GuidoParser((core, basic, advanced))
    score = parser.parse(s)
    return score
 
-def guido_tree_to_guido_string(score, output_encoding="latin_1"):
+def Guido_tree_to_Guido_string(score):
    assert isinstance(score, core.Score)
-   stream = FileWriter(StringIO(), output_encoding)
+   stream = FileWriter(StringIO(), config.get("guido_encoding"))
    stream.write("% " + created + "\n")
    score.write_guido(stream)
    return stream.getvalue()
 
-def guido_tree_to_guido_file(score, filename=None, output_encoding="latin_1"):
+def Guido_tree_to_Guido_file(score, filename=None):
    assert isinstance(score, core.Score)
-   output = FileWriter(filename, output_encoding)
+   output = FileWriter(filename, config.get("guido_encoding"))
    output.write("% " + created + "\n")
    score.write_guido(output)
 
-def guido_string_to_image(gmn_string, filename=None, width="16.0cm", height="12.0cm", zoom=0.5):
-   save_gif(gmn_string, filename)
+def Guido_string_to_Guido_image(gmn_string, filename=None):
+   save_gif(gmn_string, filename, config.get("width"), config.get("height"), config.get("zoom"))
 
-inputs = ["guido_file", "guido_string", "guido_tree"]
-outputs = ["guido_file", "guido_string", "guido_tree", "image"]
+inputs = ["Guido_file", "Guido_string", "Guido_tree"]
+outputs = ["Guido_file", "Guido_string", "Guido_tree", "Guido_image"]
 

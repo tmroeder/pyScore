@@ -110,3 +110,7 @@ m2g_words = {
 m2g_wedge = {
    'crescendo': 'cresc',
    'diminuendo': 'dim'}
+g2m_ornament_size = {
+   0: 'unison',
+   1: 'half',
+   2: 'whole'}

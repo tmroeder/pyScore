@@ -26,8 +26,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 from __future__ import generators
 from lexer import Token, Tokenizer, WrongToken
+
+from pyScore.config import config
 from pyScore.Guido.objects import core
 from pyScore.Guido import tree_builder
+
 try:
     import textwrap
 except ImportError:
@@ -118,15 +121,14 @@ class GuidoParser:
     # (for notes that begin a part that have unspecified
     # attributes.)
 
-    def __init__(self, tags, warnings=True, trace=False):
+    def __init__(self, tags):
         """
         tags: dictionaries containing tags
         warnings: if true, print out warning messages        
         """
-        # self.s = s
         self._tags = tags
-        self._warnings = warnings
-        if trace:
+        self._warnings = config.get("warnings")
+        if config.get("trace"):
             self.trace = self._trace_real
         else:
             self.trace = self._trace_dummy

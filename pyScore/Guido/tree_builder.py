@@ -185,16 +185,10 @@ class GuidoTreeBuilder:
       self.current_collection = self._stack[-1]
 
    def add_active_tag(self, tag_obj):
-      if tag_obj.name == "slur":
-         print "add_active_tag", tag_obj.id
-         print self._active_tags
       assert isinstance(tag_obj, core.TAG)
       self._active_tags.append(tag_obj)
       
    def remove_active_tag(self, tag_obj):
-      if tag_obj.name == "slur":
-         print "remove_active_tag", tag_obj.id
-         print self._active_tags
       assert isinstance(tag_obj, core.TAG)
       active_tags = self._active_tags
       for i in range(len(active_tags) - 1, -1, -1):
