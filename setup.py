@@ -42,7 +42,8 @@ walk("pyScore", visit, ())
 ########################################
 # Scripts
 
-scripts = [x for x in glob(join("scripts", "*")) if not isdir(x)]
+scripts = [x for x in glob(join("scripts", "*"))
+           if not isdir(x) and not '~' in x]
 
 ########################################
 # Data

@@ -32,7 +32,7 @@ from pyScore.elementtree.ElementTree import iselement, tostring
 
 class MusicXMLToGuido:
    def __init__(self, tags, warnings=True, verbose=False):
-      self._tag_factory = core.TagFactoryClass(tags)
+      self._tags = tags
       self._warnings = warnings
       self._verbose = verbose
 
@@ -49,7 +49,7 @@ class MusicXMLToGuido:
    def convert(self, tree):
       # TODO: deal with time-wise MusicXML scores (e.g. use Michael Good's XSLT transform first)
       assert iselement(tree)
-      builder = GuidoTreeBuilder(self._tag_factory)
+      builder = GuidoTreeBuilder(self._tags)
       state = self.State()
       self.make_sequences(tree, builder, state)
       return builder.score

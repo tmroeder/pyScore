@@ -4,7 +4,10 @@ pyScore
 
 (c) 2004 Michael Droettboom
 
-Various Python tools for working with symbolic music notation.
+pyScore is a set of Python-based tools for working with symbolic music
+notation.
+
+This software is released under the GNU General Public License (GPL).
 
 .. contents::
 

@@ -38,6 +38,8 @@ DIST_DIR = join("..", "dist")
 SRC_DIR = join("..", "pyScore")
 README = join("..", "README")
 
+# Find source distributions
+print "Finding source distributions..."
 files = []
 file_types = ['zip', 'bz2', 'gz']
 for type in file_types:
@@ -51,6 +53,7 @@ for file in files:
    downloads.append('- `%s <%s>`_ (%d bytes)\n' % (file_root, file_root, file_size))
 source = open("index.txt", "r").read()
 
+print "Getting source code notes..."
 release_notes = get_notes(SRC_DIR)
 
 parts = {"downloads": ''.join(downloads),
@@ -62,9 +65,11 @@ filled_in = source % parts
 if not isfile(README) or filled_in != open(README, "r").read():
    open(README, "w").write(filled_in)
 
+print "Generating main documentation page..."
 fd = StringIO(filled_in)
 publish_file(source=fd, destination=open(join(DIST_DIR, "index.html"), "w"), writer_name="html")
 
+print "Generating test results page..."
 if isfile("tests.txt"):
    publish_file(source=open("tests.txt", "rU"),
                 destination=open(join(DIST_DIR, "tests.html"), "w"),

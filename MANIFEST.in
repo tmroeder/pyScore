@@ -5,7 +5,7 @@ recursive-include examples/Guido/*.gmn
 recursive-include tests/Guido/input *.gmn
 recursive-include tests/Guido/groundtruth *.gmn *.xml
 
-recursive-include tests/MusicXML/input *.gmn
+recursive-include tests/MusicXML/input *.xml
 recursive-include tests/MusicXML/groundtruth *.gmn *.xml
 
 recursive-include profile/Guido/input *.gmn
@@ -15,4 +15,4 @@ recursive-include pyScore/MusicXML/XSLT *.xsl
 
 include scripts/guido2musicxml scripts/musicxml2guido scripts/guido2guido scripts/pyScore_test scripts/pyScore_profile
 
-include README MANIFEST.in setup.py
+include README MANIFEST.in LICENSE setup.py

@@ -264,9 +264,9 @@ the Guido stream, such as stem direction..."""
          SubElement(note, "stem").text = state.stem_direction
       if item.parent.cross_staff:
          SubElement(note, "staff").text = str(item.staff)
-      self.make_tremolo_and_beam(item, note, state)
       notations = SubElement(note, "notations")
       if not chord:
+         self.make_tremolo_and_beam(item, note, state)
          for tie in ties:
             notations.append(tie)
          self.make_tuplet(length, name, item, notations, state)
@@ -367,7 +367,7 @@ the Guido stream, such as stem direction..."""
             type = "end"
          else:
             type = "continue"
-            number = state.active_beams.index(beam) + 1
+            number = beam.number
          SubElement(note, "beam", number=str(number)).text = type
 
    def make_tuplet(self, length, name, item, notations, state):

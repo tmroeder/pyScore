@@ -1,0 +1,3 @@
+{[\tempo<"Allegro"> c1/4 d e f g a b c2 |
+ \tempo<"Presto", "1/4=200"> c1 d e f g a b c2 |
+ \accelBegin d e f \accelEnd]}

@@ -24,14 +24,11 @@ from pyScore.util.rational import Rat
 from pyScore.Guido.parser.lexer import ParseError, Position
 from pyScore.util.structures import SortedListSet
 
-from inspect import isclass
-import re
 import sys
 try:
     import textwrap
 except ImportError:
     from pyScore.util.backport import textwrap
-from types import *
 
 class GuidoError(Exception):
     pass
@@ -427,7 +424,11 @@ class TAG(GUIDO_OBJECT):
         return s.replace('"', r'\"')
 
     def arg_escape(self, s):
-        return '"%s"' % self.escape(s)
+        try:
+            s = int(s)
+            return str(s)
+        except ValueError:
+            return '"%s"' % self.escape(s)
 
     def write_guido(self, stream, state={}):
         if self.mode == "End" and self.use_parens and self.events == []:
@@ -451,11 +452,8 @@ class TAG(GUIDO_OBJECT):
         if self.use_parens:
             stream.write("(")
 
-    def tag(self, item):
-        item.tags.setdefault(self.__class__.__name__, []).append(self)
-        self.events.append(item)
-
     def is_first(self, note):
+        print note, self.events
         for n in self.events:
             if isinstance(n, (Note, Chord)):
                 if isinstance(n, Note):
@@ -477,13 +475,7 @@ class TAG(GUIDO_OBJECT):
                 elif isinstance(n, Chord):
                     if note in n.collection:
                         return True
-                break
-        for i in range(len(self.events)-1, -1, -1):
-            n = self.events[i]
-            if isinstance(n, Chord):
-                if note in n.collection:
-                    return True
-                break
+                return False
         return False
 
 class DEFAULT_TAG(TAG):
@@ -505,7 +497,7 @@ class Sequence(INLINE_COLLECTION):
 
 class Segment(INLINE_COLLECTION):
     separator = ",\n"
-    parens = "{}"
+    parens = '{}'
 
     def __init__(self, pos=None):
         INLINE_COLLECTION.__init__(self, pos)
@@ -534,145 +526,3 @@ class Barline(GUIDO_OBJECT):
         stream.write("|\n")
 
 
-########################################
-# FACTORY FUNCTIONS
-
-class Factory(object):
-    pass
-
-class EventFactoryClass(Factory):
-    _pitch_names = PITCHED.solfege_pitch_names + ["empty"]
-    _rer_pitch_name = ("(?P<pitch_name>%s|[a-g_])" %
-                      "|".join([u"(?:%s)" % x for x in _pitch_names]))
-    _rer_octave1 = "(?P<octave1>[+\-]?[0-9]+)?"
-    _rer_accidental = "(?P<accidental>(?:is)|#+|&+)?"
-    _rer_octave2 = "(?P<octave2>[+\-]?[0-9]+)?"
-    _rer_num = "(?:\*(?P<num>[0-9]+))?"
-    _rer_den = "(?:/(?P<den>[0-9]+))?"
-    _rer_dotting = "(?P<dotting>\.*)"
-    _rer_duration = _rer_num + _rer_den + _rer_dotting
-    regex = re.compile(
-        _rer_pitch_name +
-        _rer_octave1 +
-        _rer_accidental +
-        _rer_octave2 +
-        _rer_duration)
-
-    note_class = Note
-    rest_class = Rest
-    empty_class = Empty
-
-    def __init__(self, module):
-        self._module = module
-
-    def __call__(self, pitch_name, octave=None, accidental=None,
-                 num=None, den=None, dotting=None, pos=None):
-        if pitch_name == "_":
-            return self._module['Rest'](num, den, dotting, pos=pos)
-        if pitch_name == "empty":
-            return self._module['Empty'](num, den, dotting, pos=pos)
-        if pitch_name in PITCHED.pitch_names:
-            return self._module['Note'](pitch_name, octave, accidental,
-                                        num, den, dotting, pos=pos)
-        else:
-            match = self.regex.match(pitch_name)
-            if match != None:
-                matches = match.groupdict()
-                return self.__call__(matches['pitch_name'], matches['octave'],
-                                     matches['accidental'], matches['num'],
-                                     matches['den'], matches['dotting'],
-                                     pos=pos)
-            else:
-                raise ValueError("'%s' is not a valid GUIDO pitch name, note or rest." %
-                                 pitch_name)
-EventFactory = EventFactoryClass(globals())
-
-class TagFactoryClass(Factory):
-    regex_tag_name = re.compile("[A-Za-z_][A-Za-z0-9_]*")
-    regex_arg_str = '(?P<arg>(?:(?P<key>[A-Za-z_][A-Za-z0-9_]*)=)?(?:")?(?P<value>[^"]*)(?:")?)'
-    regex_arg = re.compile(regex_arg_str)
-    regex = re.compile(
-        r'\\(?P<name>[A-Za-z_][A-Za-z0-9_]*)(:(?P<id>[0-9]+))?(?:\<(?P<args>[^>]*)\>)?'
-    )
-    
-    def __init__(self, tags):
-        if type(tags) not in (ListType, TupleType):
-            tags = [tags]
-        self._registered_tags = {}
-        for t in tags:
-            self.register_module_of_tags(t)
-        
-    def register_module_of_tags(self, t):
-        if not type(t) == DictType:
-            t = t.__dict__
-        for key, val in t.items():
-            if (isclass(val) and
-                issubclass(val, TAG)):
-                self._registered_tags[key] = val
-
-    def __call__(self, name, id, args, pos=None, mode="", use_parens=False):
-        if (not type(name) in (StringType, UnicodeType) or len(name) < 1 or
-            self.regex_tag_name.match(name) is None):
-            raise ValueError("'%s' is an invalid tag name." % str(name))
-
-        if name.startswith('\\'):
-            match = regex.match(name)
-            if not match is None:
-                matches = match.groupdict()
-                return self.__call__(
-                    matches['name'], matches['id'], matches['args'],
-                    pos=pos)
-            else:
-                raise ValueError("'%s' is not a valid tag." % name)
-            
-        if id != None:
-            try:
-                id = int(id)
-            except:
-                raise ValueError("'%s' is an invalid tag id number." % id)
-
-        args_list = []
-        args_dict = {}
-        if type(args) in (TupleType, ListType):
-            args_list = args
-        elif type(args) in (StringType, UnicodeType):
-            first = True
-            while len(args):
-                if not first:
-                    if args.startswith(","):
-                        args = args[1:].strip()
-                    else:
-                        raise ValueError("Couldn't parse arguments to tag '%s'" % name)
-                first = False
-                match = self.regex_arg.match(args)
-                if match == None:
-                    raise ValueError("'%s' is an invalid argument to tag '%s'." %
-                                     (arg, name))
-                match_dict = match.groupdict()
-                if match_dict['key'] != None:
-                    args_dict[match_dict['key']] = match_dict['value']
-                else:
-                    args_list.append(match_dict['value'])
-                args = args[match.end("arg"):].strip()
-        elif type(args) == type({}):
-            args_dict = args
-
-        if self._registered_tags.has_key(name):
-            tag_cls = self._registered_tags[name]
-        else:
-            if name.endswith("Begin"):
-                name = name[:-5]
-                mode = "Begin"
-            elif name.endswith("End"):
-                name = name[:-3]
-                mode = "End"
-            if self._registered_tags.has_key(name):
-                tag_cls = self._registered_tags[name]
-            else:
-                tag_cls = self._registered_tags['DEFAULT_TAG']
-        tag = tag_cls(name, id, args_list, args_dict, pos=pos)
-        tag.mode = mode
-        tag.use_parens = use_parens
-        return tag
-
-TagFactory = TagFactoryClass(globals())

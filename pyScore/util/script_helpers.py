@@ -28,6 +28,8 @@ try:
 except ImportError:
    from pyScore.util.backport import textwrap
 from pyScore.Guido import noteserver
+
+from time import strftime
 from os.path import splitext, split, join, exists, isdir, isfile
 import os
 import sys
@@ -154,7 +156,7 @@ def test(modules, test_dir, tests, groundtruth=False, callback=None):
       if not isdir(doc_dir):
          print "Documentation directory '%s' does not exist." % doc_dir
       doc_fd = open(join(doc_dir, "tests.txt"), "wU")
-      doc_fd.write("Test results\n============\n\n.. contents::\n\n")
+      doc_fd.write("Test results\n============\n\nTest results generated at %s\n\n.. contents::\n\n" % strftime("%H:%M %Z on %A, %B %d, %Y"))
 
    from pyScore.convert import ConverterGraph
    converter = ConverterGraph(modules)
@@ -209,6 +211,10 @@ def test(modules, test_dir, tests, groundtruth=False, callback=None):
                         if make_documentation:
                            doc_fd.write("\n\n**Output does not match the groundtruth.**\n\n")
                         break
+               else:
+                  if make_documentation:
+                     doc_fd.write("\n\n**Output has no groundtruth to verify against.**\n\n")
+                  
 
    if len(errors):
       print textwrap.fill("ERROR: The following files caused exceptions during conversion:")

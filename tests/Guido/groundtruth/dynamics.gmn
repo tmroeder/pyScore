@@ -1,0 +1,6 @@
+{[\intens<"mf"> c1/4 d e f |
+ \intens<"ff">( c d e f g ) |
+ \cresc( c d e f g ) |
+ \dim( g f e d c ) |
+ \crescBegin c d e \crescEnd \dimBegin e d c \dimEnd |
+]}

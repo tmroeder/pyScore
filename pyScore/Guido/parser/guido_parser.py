@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 from __future__ import generators
 from lexer import Token, Tokenizer, WrongToken
 from pyScore.Guido.objects import core
-from pyScore.Guido.tree_builder import GuidoTreeBuilder
+from pyScore.Guido import tree_builder
 try:
     import textwrap
 except ImportError:
@@ -50,11 +50,11 @@ class GuidoTokenizer(Tokenizer):
     
     class Note(Token):
         """The note token is defined in the GUIDO object core.py."""
-        regex = core.EventFactory.regex
+        regex = tree_builder.regex_event
 
     class Tag(Token):
         """The tag token is defined in the GUIDO object core.py."""
-        regex = core.TagFactory.regex
+        regex = tree_builder.regex_tag
 
     class SequenceStart(Token):
         regex = re.compile("\[")
@@ -117,13 +117,6 @@ class GuidoParser:
     # default note defines the default attributes of notes
     # (for notes that begin a part that have unspecified
     # attributes.)
-    default_note = {'pitch_name': 'c',
-                    'octave1': 1,
-                    'accidental': '',
-                    'octave2': 1,
-                    'num': 1,
-                    'den': 4,
-                    'dotting': ''}
 
     def __init__(self, tags, warnings=True, trace=False):
         """
@@ -131,7 +124,7 @@ class GuidoParser:
         warnings: if true, print out warning messages        
         """
         # self.s = s
-        self._tag_factory = core.TagFactoryClass(tags)
+        self._tags = tags
         self._warnings = warnings
         if trace:
             self.trace = self._trace_real
@@ -157,14 +150,14 @@ class GuidoParser:
         self.unknown_tags = {}
         self.active_tags = []
         tokens = GuidoTokenizer(self.s)
-        builder = GuidoTreeBuilder(self._tag_factory)
+        builder = tree_builder.GuidoTreeBuilder(self._tags)
         tokens = self.top(tokens, builder)
         if self._warnings:
             if not tokens.at_end():
                 sys.stderr.write("WARNING: Extra text at end of file\n")
-            if len(self.unknown_tags.keys()):
+            if len(builder.unknown_tags.keys()):
                 sys.stderr.write("WARNING: Unknown tags:\n")
-                sys.stderr.write(textwrap.fill(', '.join(['\\' + x for x in self.unknown_tags.keys()])))
+                sys.stderr.write(textwrap.fill(', '.join(['\\' + x for x in builder.unknown_tags.keys()])))
                 sys.stderr.write("\n")
         return builder.score
 
@@ -185,7 +178,6 @@ class GuidoParser:
     def SEGMENT(self, tokens, builder):
         self.trace("SEGMENT", tokens)
         tokens.match(tokens.SegmentStart)
-        # builder.set_as_collection(core.Segment(tokens.current_position.get_last()))
         builder.begin_Segment(tokens.current_position.get_last())
         try:
             tokens = self.SEQUENCE(tokens.copy(), builder)
@@ -205,12 +197,9 @@ class GuidoParser:
     def SEQUENCE(self, tokens, builder):
         self.trace("SEQUENCE", tokens)
         tokens.match(tokens.SequenceStart)
-        # builder.set_as_collection(core.Sequence(pos=tokens.current_position.get_last()))
         builder.begin_Sequence()
-        self.last_note = self.default_note
         tokens = self.VOICE(tokens, builder)
         tokens.match(tokens.SequenceEnd)
-        # builder.reset_collection()
         builder.end_Sequence()
         return tokens
 
@@ -236,47 +225,15 @@ class GuidoParser:
         """Parses a note, rest or empty."""
         self.trace("EVENT", tokens)
         note = tokens.match(tokens.Note)
-
-        # All of this madness below is to handle the passing of note
-        # attributes from one to the next when note attributes are left
-        # unspecified.  This is well defined in the Basic GUIDO specs.
-        if note['num'] is None:
-            if note['den'] is None:
-                note['num'] = self.last_note['num']
-                note['den'] = self.last_note['den']
-                if note['dotting'] is None:
-                    note['dotting'] = self.last_note['dotting']
-            else:
-                note['num'] = 1
-        else:
-            if note['den'] is None:
-                note['den'] = self.last_note['den']
-        if note['octave1'] is None:
-            if note['octave2'] is None:
-                note['octave1'] = self.last_note['octave1']
-            else:
-                note['octave1'] = note['octave2']
-        self.last_note = note
-
-        # Create the note or rest object
-##         note_obj = core.EventFactory(
-##             note['pitch_name'],
-##             int(note['octave1']),
-##             note['accidental'],
-##             int(note['num']),
-##             int(note['den']),
-##             len(note['dotting']),
-##             pos=tokens.current_position.get_last())
-
-##         builder.add(note_obj)
-
-        builder.add_Event(note['pitch_name'],
-             int(note['octave1']),
-             note['accidental'],
-             int(note['num']),
-             int(note['den']),
-             len(note['dotting']),
-             pos=tokens.current_position.get_last())
+        builder.add_Event(
+            note['pitch_name'],
+            note['octave1'],
+            note['accidental'],
+            note['num'],
+            note['den'],
+            note['dotting'],
+            note['octave2'],
+            pos=tokens.current_position.get_last())
         return tokens
 
     def TAG(self, tokens, builder, inner):
@@ -292,10 +249,6 @@ class GuidoParser:
 
         name = tag_obj.name
         id = tag_obj.id
-
-        # This is just for warnings
-        if isinstance(tag_obj, core.DEFAULT_TAG):
-            self.unknown_tags[tag['name']] = None
 
         if tag_obj.mode == "Begin":
             pass
