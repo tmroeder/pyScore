@@ -2,12 +2,23 @@
 pyScore
 =======
 
-(c) 2004 Michael Droettboom
+Copyright 2004 Michael Droettboom
 
 pyScore is a set of Python-based tools for working with symbolic music
 notation.
 
+Since it is pure Python (with an optional compiled rational number
+library), it runs on many different platforms without modifications,
+including Microsoft Windows, Linux and Apple Mac OS-X.
+
+pyScore can be run from the commandline or as a Python library.  GUI
+support *may* be available in the future if there is enough demand.
+It should be fairly easy for an experienced Python GUI programmer to
+build a GUI for pyScore.
+
 This software is released under the GNU General Public License (GPL).
+This work is supported in part by the National Science Foundation
+through an Information Technology Research grant.
 
 .. contents::
 
@@ -21,8 +32,9 @@ The current features are:
 - Guido_ to MusicXML_ conversion
 - MusicXML_ to Guido_ conversion
 - MusicXML_ to MidiXML_ to MIDI_ conversion (at the moment this is
-  very "literal")
-- Obtaining rendered music images from the Guido_ Noteserver_.
+  very "literal", but works for many things)
+- Obtaining rendered music images from the Guido_ Noteserver_ over an Internet connection.
+- a set of test cases for authors of Guido_ and MusicXML_ tools
 
 .. _Guido: http://www.salieri.org/guido/
 .. _Noteserver: http://www.noteserver.org/
@@ -62,9 +74,11 @@ demonstrate the abilities of the system.
 It is not expected at this point that the output is entirely correct.
 If you see a long URL displayed beginning with
 ``http://tempo.iti.informatik.tu-darmstadt.de/``, that means the Guido
-NoteServer choked on what was being sent to it.  The XML is extremely
-hard to read at the moment because I haven't got around to
-pretty-printing it yet.
+NoteServer choked on what was being sent to it, which is most likely
+the result of pyScore generating erroneous output. Internet Explorer and
+Mozilla will display the MusicXML files as pretty-printed XML which is
+a nice way to debug the output.  If your browser is set up to play
+MIDI files, they should play directly from the link.
 
 .. __: tests.html
 
@@ -101,25 +115,26 @@ Acknowledgements
 
 This package includes local copies of other third-party packages, so
 that it can be installed on a vanilla Python system.  I'd like to
-thank these Ã¼ber-programmers for their great work:
+thank these ÃÂ¼ber-programmers for their great work:
 
 - MusicXML and MidiXML `DTDs and XSLTs`__ by Michael Good
 
 .. __: http://www.musicxml.com/
 
-- ElementTree__ by Frederich Lundh
+- ElementTree__ (for XML processing with a subset of XPath) by Frederich Lundh
 
 .. __: http://effbot.org/zone/element-index.htm
 
-- cRat__ by Christopher A. Craig
+- cRat__ (a C-based high performance rational number library) by Christopher A. Craig
 
 .. __: http://cvs.sourceforge.net/viewcvs.py/pythonic/crat/
 
--  Rat__ by Sjoerd Mullender
+-  Rat__ (a Python rational number library) by Sjoerd Mullender
 
 .. __: http://cvs.sourceforge.net/viewcvs.py/python/python/dist/src/Demo/classes/Rat.py
 
 - `Python MIDI Package`__ by Max M (I don't really use the package, I just
-  copied and pasted the constants.  Max M deserves credit, however.)
+  copied and pasted the constants.  Thank you, Max M, for saving me a
+  lot of typing.)
 
 .. __: http://www.mxm.dk/products/public/pythonmidi

@@ -24,12 +24,14 @@ from pyScore.MIDI.conversion_constants import *
 from pyScore.MIDI.midi_codes import *
 from pyScore.util.range_checking import *
 
+
 from math import log
 try:
     import textwrap
 except ImportError:
     from pyScore.util.backport import textwrap
 
+config.add_option("", "--divisions", action="store", default=DIVISIONS, type="int")
 config.add_option("", "--ticks-per-beat", type="int", default=TICKS_PER_BEAT,
                   help="[midi] The number of MIDI ticks per quarter note when outputting MidiXML")
 config.add_option("", "--midi-format", type="int", default=1,
@@ -47,11 +49,10 @@ class MusicXMLToMidiXML:
       self._ticks_per_beat = config.get("ticks_per_beat")
       self._warnings = config.get("warnings")
       self._verbose = config.get("verbose")
+      self._divisions = config.get("divisions")
 
    class State:
       def __init__(self):
-         self.divisions = DIVISIONS
-         self.ticks_per_beat = TICKS_PER_BEAT
          self.format = 1
          self.part_no = 0
          self.channel = 1

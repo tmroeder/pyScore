@@ -188,12 +188,12 @@ the Guido stream, such as stem direction..."""
             state = self.State()
             measure = SubElement(part_tag, "measure", number=str(state.measure_no + 1))
             attributes = SubElement(measure, "attributes")
-            SubElement(attributes, "divisions").text = str(DIVISIONS)
+            SubElement(attributes, "divisions").text = str(self._divisions)
             if num_staves > 1:
                SubElement(attributes, "staves").text = str(num_staves)
             self.make_part(collection, barlines, part_tag, Rat(0, 1), measure, state)
             if state.last_ending != None:
-               state.last_ending.set("type", "stop")
+               state.last_ending.find("./ending").set("type", "stop")
             # Delete empty measures (if any) at end of part
             if len(part_tag[-1]) == 0:
                part_tag.remove(part_tag[-1])
@@ -212,7 +212,11 @@ the Guido stream, such as stem direction..."""
                measure.remove(direction)
             else:
                if item.parent.voice != None:
+                  sound = direction.find("./sound")
                   SubElement(direction, "voice").text = str(item.parent.voice)
+                  if sound is not None:
+                     direction.remove(sound)
+                     direction.append(sound)
          if isinstance(item, (core.Barline, core.DURATIONAL)):
             if (state.measure_no < len(barlines) and
                 item.time_spine >= barlines[state.measure_no]):
@@ -354,7 +358,7 @@ the Guido stream, such as stem direction..."""
       item.raise_error("Error determining look of note.")
 
    def make_time_modification(self, length, name, item, note, state):
-      if length != None and (length.num != item.num or length.den != item.den):
+      if not length is None and (length.num != item.num or length.den != item.den):
          dur = Rat(item.num, item.den)
          tuplet = length / dur
          time_modification = SubElement(note, "time-modification")
@@ -363,6 +367,7 @@ the Guido stream, such as stem direction..."""
 
    def make_tremolo_and_beam(self, item, note, state):
       # EXT: tremolos don't seem to work in Turandot
+      # EXT: tremolos don't seem to work in Finale 2004 / Dolet 1.3.1
       for tremolo in item.get_tag("tremolo"):
          type = "continue"
          if tremolo.is_first(item):
@@ -486,11 +491,11 @@ the Guido stream, such as stem direction..."""
                pitch2 = core.PITCHED.pitch_names_to_semitones[group.collection[1].pitch_name] % 12
                size = int(abs(pitch1 - pitch2))
                if g2m_ornament_size.has_key(size):
-                  ornament_element.set("trill-sound", g2m_ornament_size[size])
+                  ornament_element.set("trill-step", g2m_ornament_size[size])
                else:
-                  ornament_element.set("trill-sound", "whole")
+                  ornament_element.set("trill-step", "whole")
             else:
-               ornament_element.set("trill-sound", "unison")
+               ornament_element.set("trill-step", "unison")
       return found_one
 
    # TAGS ########################################
@@ -609,25 +614,30 @@ the Guido stream, such as stem direction..."""
 
    def tag_repeatBegin(self, tag, measure, direction, state):
       state.last_ending = None
-      barline = SubElement(measure, "barline")
+      barline = SubElement(measure, "barline", location="left")
       SubElement(barline, "repeat", direction="forward",
                  times=str(tag.repeats))
 
    def tag_repeatEnd(self, tag, measure, direction, state):
       # EXT: multiple repeat endings do not seem to work in Turandot
+      # EXT: repeats display but do not actually play in Turandot
       barline = SubElement(measure, "barline")
       if tag.mode == "Begin":
          if len(tag.events):
             if state.last_ending != None:
                state.last_ending.find("./ending").set("type", "stop")
                SubElement(state.last_ending, "repeat", direction="backward")
-            state.last_ending = SubElement(barline, "ending", type="start",
-                                           number=str(tag.repetition))
+               state.last_ending.set("location", "right")
+            state.last_ending = barline
+            SubElement(barline, "ending", type="start",
+                       number=str(tag.repetition))
+            barline.set("location", "left")
       else:
          SubElement(barline, "repeat", direction="backward")
+         barline.set("location", "right")
 
    def tag_repeatEndEnd(self, tag, measure, direction, state):
-      barline = SubElement(measure, "barline")
+      barline = SubElement(measure, "barline", location="right")
       state.last_ending = barline
       SubElement(barline, "ending", type="discontinue",
                  number=str(tag.repetition))
@@ -649,6 +659,8 @@ the Guido stream, such as stem direction..."""
       sound = SubElement(direction, "sound",
                          tempo = str(int((tag.bpm * 4 * tag.num) / tag.den)))
 
+   # NOTE: accelerandos/ritardandos are output to MusicXML as text only (i.e. no actual tempo changes)
+   
    def tag_accelerando(self, tag, measure, direction, state):
       name = tag.name
       if len(name) > 5:

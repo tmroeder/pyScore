@@ -23,8 +23,6 @@ from inspect import getfile
 from os import system
 from os.path import split, join
 
-# PLAN: Possibly switch to another XML toolkit to support transformation and validation directly from Python
-
 def validate(filename):
    dir = split(getfile(validate))[0]
    # TODO: check that we have ``xmllint`` and use it

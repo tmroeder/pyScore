@@ -229,11 +229,12 @@ class MidiXMLToMidi:
          self._code = code
 
       def __call__(self, element, write, state):
-         write(chr(META_EVENT))
-         write(chr(self._code))
-         s = element.text.encode("ascii", "replace")
-         write(bin_var_number(len(s)))
-         write(s)
+         if element.text is not None: 
+             write(chr(META_EVENT))
+             write(chr(self._code))
+             s = element.text.encode("ascii", "replace")
+             write(bin_var_number(len(s)))
+             write(s)
 
    event_TextEvent = MetaEventText(TEXT)
    event_CopyrightNotice = MetaEventText(COPYRIGHT)

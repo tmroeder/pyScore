@@ -1,3 +1,3 @@
-% Created with pyScore 0.1 by Michael Droettboom <http://dkc.jhu.edu/~mdboom/pyScore>
-{[\beam( \beam( a1/16 a a a ) \beam( a a a a ) ) |
- \beam( \beam( a a ) \beam( a a ) \beam( a a ) \beam( a a ) )]}
+% Created with pyScore 0.2 by Michael Droettboom <http://dkc.jhu.edu/~mdboom/pyScore>
+{[\meter<"C/"> \beam( \beam( a1/16 a a a ) \beam( a a a a ) ) |
+ \beam( \beam( a a ) \beam( a a ) ) \beam( \beam( a a ) \beam( a a ) )]}

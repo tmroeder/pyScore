@@ -252,9 +252,9 @@ class test:
             if b.startswith(comment):
                j += 1
          if i < len(test_list) and j < len(gt_list):
-            a = test_list[i]
-            b = gt_list[j]
-            if a.strip() != b.strip():
+            a = test_list[i].strip().replace(chr(10), "")
+            b = gt_list[j].strip().replace(chr(10), "")
+            if a != b:
                return False
          i += 1
          j += 1
