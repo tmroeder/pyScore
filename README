@@ -58,6 +58,9 @@ Download
 - `pyScore-0.2.tar.bz2 <pyScore-0.2.tar.bz2>`_ (151250 bytes)
 - `pyScore-0.2.tar.gz <pyScore-0.2.tar.gz>`_ (185155 bytes)
 - `pyScore-0.2.zip <pyScore-0.2.zip>`_ (287853 bytes)
+- `pyScore-0.3.tar.bz2 <pyScore-0.3.tar.bz2>`_ (151300 bytes)
+- `pyScore-0.3.tar.gz <pyScore-0.3.tar.gz>`_ (185229 bytes)
+- `pyScore-0.3.zip <pyScore-0.3.zip>`_ (287881 bytes)
 
 
 You can also `browse the CVS`__.
@@ -67,7 +70,7 @@ You can also `browse the CVS`__.
 Release Notes
 =============
 
-Pertaining to latest release (0.2):
+Pertaining to latest release (0.3):
 
 Notes
 -----
@@ -117,7 +120,7 @@ Bugs or shortcomings in other systems
 
 - tremolos don't seem to work in Turandot [guido_to_musicxml.py]
 
-- tremolos don't seem to work in Finale 2004 / Dolet 1.0 [guido_to_musicxml.py]
+- tremolos don't seem to work in Finale 2004 / Dolet 1.3.1 [guido_to_musicxml.py]
 
 - secondary beaming doesn't seem to work in Turandot [guido_to_musicxml.py]
 
@@ -129,9 +132,9 @@ Bugs or shortcomings in other systems
 
 - System breaks don't work in Turandot. [guido_to_musicxml.py]
 
-- the pyScore-generated repeats don't seem to work at all in Finale 2004 / Dolet 1.0 [guido_to_musicxml.py]
-
 - multiple repeat endings do not seem to work in Turandot [guido_to_musicxml.py]
+
+- repeats display but do not actually play in Turandot [guido_to_musicxml.py]
 
 - tempo tags don't seem to work in Turandot [guido_to_musicxml.py]
 
