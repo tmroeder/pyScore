@@ -31,7 +31,8 @@ class key(TAG):
         'E': 4,   'F': -1, 'F#': 6,  'G&': -7, 'G': 1,
         'A&': -4, 'A': 3,  'B&': -2, 'B': 5,
         'a': 0,   'a#': 7, 'b&': -5, 'b': 2,   'c': -3,
-        'c#': 4,  'd': -1, 'd#': 6,  'e&': -7, 'e': 1,
+        'c#': 4,  'd': -1, 'd#': 6,  'a&': -7, 'e': 1,
+        'e&': -6,
         'f': -4,  'f#': 3, 'g': -2,  'g#': 5 }
 
     def __init__(self, name, id, args_list, args_dict, *args, **kwargs):
@@ -40,16 +41,16 @@ class key(TAG):
             self.raise_error("Invalid number of arguments on \key tag.")
         s = args_list[0]
         try:
+            self.key_mode = None
             self.num_sharps_or_flats = int(s)
-            self.mode = "major"
         except:
             if self.key_names_to_num_sharps_or_flats.has_key(s):
                 self.num_sharps_or_flats = (
                     self.key_names_to_num_sharps_or_flats[s])
                 if s == s.upper():
-                    self.mode = "major"
+                    self.key_mode = "major"
                 else:
-                    self.mode = "minor"
+                    self.key_mode = "minor"
             else:
                 self.raise_error(
                     "%s is an invalid key name." % s)

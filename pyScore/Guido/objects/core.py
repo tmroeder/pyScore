@@ -164,7 +164,7 @@ class Score(INLINE_COLLECTION):
         self.toplevel.write_guido(stream, state)
 
 ########################################
-# NOTES AND RESTS
+# Notes and rests
 
 class DURATIONAL(GUIDO_OBJECT):
     one_dot = Rat(3, 2)
@@ -426,6 +426,9 @@ class TAG(GUIDO_OBJECT):
     def escape(self, s):
         return s.replace('"', r'\"')
 
+    def arg_escape(self, s):
+        return '"%s"' % self.escape(s)
+
     def write_guido(self, stream, state={}):
         if self.mode == "End" and self.use_parens and self.events == []:
             stream.write(")")
@@ -437,7 +440,7 @@ class TAG(GUIDO_OBJECT):
         if self.id != None:
             stream.write(":")
             stream.write(str(self.id))
-        items = (['"%s"' % self.escape(x) for x in self.args_list] +
+        items = ([self.arg_escape(x) for x in self.args_list] +
                  ['%s="%s"' % (key, self.escape(val))
                   for key, val in self.args_dict.items() if val != None])
         if len(items):
@@ -490,7 +493,7 @@ class DEFAULT_TAG(TAG):
 # Concrete collections
 
 class Sequence(INLINE_COLLECTION):
-    parens = ('[', ']\n')
+    parens = '[]'
 
     def __init__(self, pos=None):
         INLINE_COLLECTION.__init__(self, pos)
@@ -501,7 +504,7 @@ class Sequence(INLINE_COLLECTION):
         INLINE_COLLECTION.write_guido(self, stream, state)
 
 class Segment(INLINE_COLLECTION):
-    separator = ", "
+    separator = ",\n"
     parens = "{}"
 
     def __init__(self, pos=None):
@@ -607,7 +610,7 @@ class TagFactoryClass(Factory):
                 issubclass(val, TAG)):
                 self._registered_tags[key] = val
 
-    def __call__(self, name, id, args, pos=None):
+    def __call__(self, name, id, args, pos=None, mode="", use_parens=False):
         if (not type(name) in (StringType, UnicodeType) or len(name) < 1 or
             self.regex_tag_name.match(name) is None):
             raise ValueError("'%s' is an invalid tag name." % str(name))
@@ -630,7 +633,7 @@ class TagFactoryClass(Factory):
 
         args_list = []
         args_dict = {}
-        if type(args) in (type(()), type([])):
+        if type(args) in (TupleType, ListType):
             args_list = args
         elif type(args) in (StringType, UnicodeType):
             first = True
@@ -654,7 +657,6 @@ class TagFactoryClass(Factory):
         elif type(args) == type({}):
             args_dict = args
 
-        mode = ""
         if self._registered_tags.has_key(name):
             tag_cls = self._registered_tags[name]
         else:
@@ -670,6 +672,7 @@ class TagFactoryClass(Factory):
                 tag_cls = self._registered_tags['DEFAULT_TAG']
         tag = tag_cls(name, id, args_list, args_dict, pos=pos)
         tag.mode = mode
+        tag.use_parens = use_parens
         return tag
 
 TagFactory = TagFactoryClass(globals())

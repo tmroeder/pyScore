@@ -10,10 +10,21 @@ from os.path import isdir
 TEST_DIRECTORY = "tests"
 tests = [
    ("Guido", Format("Guido", "gmn", "guido_file"),
-    Format("Guido", "gmn", "guido_file")),
+    Format("Guido", "gmn", "guido_file"),
+    "Guido -> Guido",
+    "This test exercises the Guido parser and grammar.  (MusicXML is uninvolved).  Some 'canonicalization' of the data is expected."),
    ("Guido", Format("Guido", "gmn", "guido_file"),
-    Format("MusicXML", "xml", "xml_file")),
-]
+    Format("MusicXML", "xml", "xml_file"),
+    "Guido -> MusicXML",
+    "Converting all Guido Basic spec and some Guido Advanced spec to MusicXML."
+   ),
+   ("MusicXML",
+    Format("MusicXML", "xml", "xml_file"),
+    Format("Guido", "gmn", "guido_file"),
+    "MusicXML -> Guido",
+    "Preliminary support for converting MusicXML to Guido."
+   )
+   ]
 
 def callback(input_file, output_file):
 ##    if output_file.endswith("xml"):

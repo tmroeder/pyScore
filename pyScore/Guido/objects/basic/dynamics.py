@@ -35,8 +35,6 @@ class DYNAMIC:
 
 class intensity(DYNAMIC, TAG):
     def __init__(self, name, id, args_list, args_dict, *args, **kwargs):
-        if not len(args_list):
-            self.raise_error("\\intensity must have at least one argument")
         DYNAMIC.__init__(self, name, id, args_list, args_dict, *args, **kwargs)
 i = intens = intensity
 

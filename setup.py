@@ -25,6 +25,8 @@ from glob import glob
 from os.path import walk, split, join, isdir
 import sys
 
+from pyScore.__version__ import __version__
+
 ########################################
 # Packages
 
@@ -50,18 +52,20 @@ data_dirs = ["pyScore.MusicXML.DTD", "pyScore.MusicXML.XSLT"]
 data_files = []
 for dir in data_dirs:
    dir = join(*dir.split("."))
-   print dir
    files = glob(join(dir, "*.*"))
    data_files.append((join(lib_path, dir), files))
 
 ########################################
 # Extensions
 
-extensions = [Extension("pyScore.util.crat", ["src/crat/cratmodule.c"],
-                        define_macros=[('NDEBUG', 1)])]
+if "--no-compiler" in sys.argv:
+   extensions = []
+else:
+   extensions = [Extension("pyScore.util.crat", ["src/crat/cratmodule.c"],
+                           define_macros=[('NDEBUG', 1)])]
 
 setup(name = "pyScore",
-      version = "0.1",
+      version = __version__,
       url = "http://dkc.jhu.edu/~mdboom/",
       author = "Michael Droettboom",
       author_email = "mdboom@jhu.edu",

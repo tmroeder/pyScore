@@ -18,56 +18,24 @@ Copyright (C) 2002 Michael Droettboom
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# TODO: separate this out into multiple files
-
 from pyScore.elementtree.ElementTree import Element, SubElement
 from pyScore.util.structures import *
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic.staff import staff as staff_tag
 from pyScore.Guido.objects.basic.instrument import instrument as instrument_tag
+from pyScore.MusicXML.conversion_constants import *
 from pyScore.util.rational import Rat
 
 import sys
 from types import *
 
-DIVISIONS = 144
-acceptable_dynamic_names = 'p pp ppp pppp ppppp pppppp f ff fff ffff fffff ffffff mp mf sf sfp sfpp fp rf rfz sfz sffz fz'.split()
-g2m_accidental = {
-   "&&": "double-flat",
-   "&": "flat",
-   "#": "sharp",
-   "##": "sharp"}
-g2m_duration_type = [
-   (Rat(1,256), "256th"),
-   (Rat(1,128), "128th"),
-   (Rat(1,64), "64th"),
-   (Rat(1,32), "32nd"),
-   (Rat(1,16), "16th"),
-   (Rat(1,8), "eighth"),
-   (Rat(1,4), "quarter"),
-   (Rat(1,2), "half"),
-   (Rat(1,1), "whole"),
-   (Rat(2,1), "breve")
-   ]
-g2m_clef_type = {
-   'g': 'G',
-   'f': 'F',
-   'c': 'C',
-   'perc': 'percussion'}
-g2m_named_meter = {
-   'C': 'common',
-   'C/': 'cut'}
-g2m_octave_types = {
-   -1: "down",
-   0: "stop",
-   1: "up"}
-
-# NOTE: MusicXML doesn't seem to have a way to support \headsReverse
-# NOTE: \noteFormat tag is completely unsupported
-# NOTE: \splitChord tag is completely unsupported
-# NOTE: \staff tag is really hairy, and supporting it will be difficult
+# NOTE: MusicXML doesn't seem to have a way to support Guido \\headsReverse
+# NOTE: Guido \\noteFormat tag is completely unsupported
+# NOTE: Guido \\splitChord tag is completely unsupported
 
 class ExtendedSequence(core.INLINE_COLLECTION):
+   """This class stores a few more bits of information about Guido sequences
+that help with the re-ordering into MusicXML order."""
    def __init__(self, collection, number):
       self.collection = collection
       for item in self.collection:
@@ -78,7 +46,12 @@ class ExtendedSequence(core.INLINE_COLLECTION):
       self.voice = None
 
 class GuidoToMusicXML:
+   """This class handles conversion from a Guido object tree to a MusicXML
+elementtree."""
+   
    class State:
+      """The state object stores state of various flags that can be changed in
+the Guido stream, such as stem direction..."""
       def __init__(self):
          self.stem_direction = None
          self.active_beams = []
@@ -114,13 +87,14 @@ class GuidoToMusicXML:
       return score_partwise
 
    def make_plan(self, score):
-      """This is a first pass to a) find where the barlines are, b) reorganize parts into staves, and c) find staff names if any."""
-      # NOTE: In GUIDO, barlines are "global": i.e. they affect all parts.  In this case, we merge all barlines, but warn if there are barlines in subsequent parts that do not match those in the previous parts.  This also ensures that measures in all parts are of equal size.
+      # NOTE: In GUIDO, barlines are "global": i.e. they affect all parts.  Therefore, we merge all barlines, but warn if there are barlines in subsequent parts that do not match those in the previous parts.
 
-      # NOTE: Cross-staff beaming doesn't work
+      # NOTE: Cross-staff beaming doesn't seem to work
       
       # First we scan through all of the parts and sort by staff, and
       # keep track of where the barlines are
+
+      # TODO: document GuidoToMusicXML.make_plan because it's really hairy
       barlines = SortedListSet()
       sequence_no = 1
       sequences = []
@@ -174,7 +148,6 @@ class GuidoToMusicXML:
             for i, seq in enumerate(seqs):
                seq.voice = i + 1
       if self._verbose:
-         print
          print "Grouping sequences into parts:"
          print [[[x.number for x in y] for y in z] for z in staff_layout]
       return staff_layout, barlines.data
@@ -185,7 +158,7 @@ class GuidoToMusicXML:
       for i, group in enumerate(staff_layout):
          for part in group:
             score_part = SubElement(part_list, "score-part", id = "P" + str(part_no))
-            # NOTE: Guido doesn't have named parts, so we grab it from the \instrument tag
+            # NOTE: Guido doesn't have named parts like MusicXML, so we grab it from the \\instrument tag
             SubElement(score_part, "part-name").text = "Music"
             part_no += 1
 
@@ -196,22 +169,25 @@ class GuidoToMusicXML:
          for part in group:
             collection = []
             part_tag = SubElement(score_partwise, "part", id="P" + str(part_no))
+            num_staves = 0
             for sequence in part:
                if sequence not in used_sequences:
                   collection.extend(sequence.collection)
                   used_sequences.append(sequence)
+                  num_staves = max(len(sequence.staves), num_staves)
             collection.sort(lambda x, y: cmp(x.time_spine, y.time_spine))
             state = self.State()
             measure = SubElement(part_tag, "measure", number=str(state.measure_no + 1))
             attributes = SubElement(measure, "attributes")
             SubElement(attributes, "divisions").text = str(DIVISIONS)
+            if num_staves > 1:
+               SubElement(attributes, "staves").text = str(num_staves)
             self.make_part(collection, barlines, part_tag, Rat(0, 1), measure, state)
             if state.last_ending != None:
                state.last_ending.set("type", "stop")
             part_no += 1
 
    def make_part(self, collection, barlines, part, time_spine, measure, state):
-      direction = None
       for item in collection:
          if isinstance(item, core.Empty):
             continue
@@ -223,12 +199,14 @@ class GuidoToMusicXML:
                measure = SubElement(
                   part, "measure", number=str(state.measure_no + 1))
          if isinstance(item, core.TAG):
-            if direction == None:
-               direction = SubElement(measure, "direction")
+            direction = SubElement(measure, "direction")
             self.dispatch_tag(item, measure, direction, state)
             if not len(direction):
                measure.remove(direction)
                direction = None
+            else:
+               if item.parent.voice != None:
+                  SubElement(direction, "voice").text = str(item.parent.voice)
          if isinstance(item, core.EVENT):
             direction = None
             self.make_note(item, measure, state)
@@ -293,11 +271,11 @@ class GuidoToMusicXML:
             notations.append(tie)
          self.make_tuplet(length, name, item, notations, state)
          self.make_slur(item, notations, state)
-         for tag in ("accent", "staccato", "tenuto"):
+         for tag in g2m_articulations:
             if len(item.get_tag(tag)):
                articulations = SubElement(notations, "articulations")
                SubElement(articulations, tag)
-         # NOTE: Note-level dynamics do not seem to work in Turandot
+         # EXT: Note-level dynamics do not seem to work in Turandot
          for intens in item.get_tag("intensity"):
             if intens.named in acceptable_dynamic_names:
                dynamics = SubElement(notations, "dynamics")
@@ -334,14 +312,14 @@ class GuidoToMusicXML:
          if tie.is_first(item):
             type = ["start"]
             state.active_ties.append(tie)
-            number = len(state.active_ties)
+            tie.number = number = len(state.active_ties)
          elif tie.is_last(item):
             type = ["stop"]
-            number = state.active_ties.index(tie) + 1
+            number = tie.number
             state.active_ties.remove(tie)
          else:
             type = ["start", "stop"]
-            number = state.active_ties.index(tie) + 1
+            number = tie.number
          for t in type:
             element = SubElement(note, "tie", type=t)
             result.append(Element("tied", type=t, number=str(number)))
@@ -368,7 +346,7 @@ class GuidoToMusicXML:
          SubElement(time_modification, "normal-notes").text = str(tuplet.den)
 
    def make_tremolo_and_beam(self, item, note, state):
-      # NOTE: tremolos don't seem to work in Turandot
+      # EXT: tremolos don't seem to work in Turandot
       for tremolo in item.get_tag("tremolo"):
          type = "continue"
          if tremolo.is_first(item):
@@ -377,20 +355,20 @@ class GuidoToMusicXML:
             type = "end"
          SubElement(note, "beam", repeater='yes', number="1").text = type
 
-      # NOTE: secondary beaming doesn't seem to work in Turandot
+      # EXT: secondary beaming doesn't seem to work in Turandot
       for beam in item.get_tag("beam"):
          if beam.is_first(item):
             state.active_beams.append(beam)
-            number = len(state.active_beams)
+            beam.number = number = len(state.active_beams)
             type = "begin"
          elif beam.is_last(item):
-            number = state.active_beams.index(beam) + 1
+            number = beam.number
             state.active_beams.remove(beam)
             type = "end"
          else:
             type = "continue"
             number = state.active_beams.index(beam) + 1
-         SubElement(note, "beam", number="1").text = type
+         SubElement(note, "beam", number=str(number)).text = type
 
    def make_tuplet(self, length, name, item, notations, state):
       if length is None or (length.num == item.num and length.den == item.den):
@@ -403,16 +381,15 @@ class GuidoToMusicXML:
       state.last_tuplet = notations
 
    def make_slur(self, item, notations, state):
-      # NOTE: Slurs on chords don't work
       for slur in item.get_tag("slur"):
          type = None
          if slur.is_first(item):
             type = "start"
             state.active_slurs.append(slur)
-            number = len(state.active_slurs)
+            slur.number = number = len(state.active_slurs)
          elif slur.is_last(item):
             type = "stop"
-            number = state.active_slurs.index(slur) + 1
+            number = slur.number
             state.active_slurs.remove(slur)
          if type:
             SubElement(notations, "slur", type=type, number=str(number))
@@ -443,7 +420,7 @@ class GuidoToMusicXML:
                   extend = True
                   syllable = syllable[:-1]
                first = True
-               # NOTE: Elisions don't work correctly in Turandot.  Maybe I'm doing something wrong?
+               # EXT: Elisions don't work correctly in Turandot.
                for part in syllable.split():
                   if not first:
                      SubElement(l, "elision")
@@ -463,14 +440,11 @@ class GuidoToMusicXML:
                note, notations = self.make_note(item, measure, state, chord=not first)
             first = False
 
-   g2m_ornaments = {'trill': 'trill-mark',
-                    'turn': 'turn',
-                    'mordent': 'mordent'}
    def make_ornaments(self, group, measure, state):
       # NOTE: trills, turns and mordents are much less specific in MusicXML than in GUIDO, so pitch name (but not the accidental) of auxiliary notes are thrown out, as well as any duration for the ornament
-      # NOTE: ornaments don't seem to work in Turandot
+      # EXT: ornaments don't seem to work in Turandot
       found_one = False
-      for ornament in ('trill', 'turn', 'mordent'):
+      for ornament in g2m_ornaments.keys():
          ornaments = group.get_tag(ornament)
          if len(ornaments):
             if found_one:
@@ -486,7 +460,7 @@ class GuidoToMusicXML:
                   ornament)
             note, notations = self.make_note(first_note, measure, state)
             ornaments_element = SubElement(notations, "ornaments")
-            ornament_element = SubElement(ornaments_element, self.g2m_ornaments[ornament])
+            ornament_element = SubElement(ornaments_element, g2m_ornaments[ornament])
             if len(group.collection) > 1:
                second_note = group.collection[1]
                if not isinstance(second_note, core.Note):
@@ -533,7 +507,7 @@ class GuidoToMusicXML:
    # clef tags
 
    def tag_clef(self, tag, measure, direction, state):
-      # NOTE: Turandot doesn't seem to handle changing clefs mid-stream
+      # EXT: Turandot doesn't seem to handle changing clefs mid-stream
       attributes = SubElement(measure, "attributes")
       clef = SubElement(attributes, "clef")
       if tag.parent.cross_staff:
@@ -558,7 +532,7 @@ class GuidoToMusicXML:
          SubElement(dynamics, tag.named)
 
    def tag_crescendo(self, tag, measure, direction, state):
-      # TODO: add words
+      # TODO: support word-based (as opposed to wedge-based) *cresc.* and *dim.*
       pass
       
    def tag_crescendoBegin(self, tag, measure, direction, state):
@@ -586,11 +560,11 @@ class GuidoToMusicXML:
       attributes = SubElement(measure, "attributes")
       key = SubElement(attributes, "key")
       SubElement(key, "fifths").text = str(tag.num_sharps_or_flats)
-      SubElement(key, "mode").text = tag.mode
+      SubElement(key, "mode").text = tag.key_mode
 
    # layout tags
    
-   # NOTE: <print new-system="yes"/> seems to be ignored by Turandot.  Not sure who's fault that is...
+   # EXT: System breaks don't work in Turandot.
    
    def tag_newSystem(self, tag, measure, direction, state):
       SubElement(measure, "print", {'new-system': 'yes'})
@@ -616,7 +590,7 @@ class GuidoToMusicXML:
                  times=str(tag.repeats))
 
    def tag_repeatEnd(self, tag, measure, direction, state):
-      # NOTE: multiple repeat endings do not seem to work in Turandot
+      # EXT: multiple repeat endings do not seem to work in Turandot
       barline = SubElement(measure, "barline")
       if tag.mode == "Begin":
          if len(tag.events):
@@ -635,7 +609,7 @@ class GuidoToMusicXML:
    # tempo tags
 
    def tag_tempo(self, tag, measure, direction, state):
-      # NOTE: tempo doesn't seem to work in Turandot
+      # EXT: tempo tags don't seem to work in Turandot
       direction_type = SubElement(direction, "direction-type")
       metronome = SubElement(direction_type, "metronome")
       SubElement(metronome, "beat-unit").text = str(tag.den)
@@ -697,11 +671,11 @@ class GuidoToMusicXML:
    # transpose tags
 
    def tag_octave(self, tag, measure, direction, state):
-      # NOTE: Octave shift does not seem to work with Turandot
+      # EXT: Octave shift does not seem to work with Turandot
       direction_type = SubElement(direction, "direction-type")
       SubElement(direction_type, "octave-shift",
                  type = g2m_octave_types[cmp(tag.octaves, 0)],
-                 size = str(abs(1 + 7 * tag.octaves)))
+                 size = str(1 + 7 * abs(tag.octaves)))
       
    def tag_octaveEnd(self, tag, measure, direction, state):
       direction_type = SubElement(direction, "direction-type")

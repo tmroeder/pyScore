@@ -22,12 +22,12 @@ from pyScore.Guido.objects.core import TAG
 import re
 
 class clef(TAG):
-    clef_names = {'treble': ('g', 2, 0),
-                  'violino': ('g', 2, 0),
-                  'bass': ('f', 4, 0),
-                  'basso': ('f', 4, 0),
-                  'tenor': ('c', 4, 0),
-                  'alto': ('c', 3, 0)}
+    clef_names = {'treble': ('g', 2),
+                  'violino': ('g', 2),
+                  'bass': ('f', 4),
+                  'basso': ('f', 4),
+                  'tenor': ('c', 4),
+                  'alto': ('c', 3)}
     default_lines = {'g': 2,
                      'f': 4,
                      'c': 3,
@@ -41,24 +41,28 @@ class clef(TAG):
             self.raise_error("Invalid number of arguments on \\clef tag.")
         s = args_list[0]
         self.clef_name = s
-        if self.clef_names.has_key(s):
-            self.type, self.clef_line, self.octave = self.clef_names[s]
-        else:
-            match = self.regex.match(s)
-            if match != None:
-                match = match.groupdict()
-                self.type = match['type']
-                self.clef_line = match['line']
-                self.octave = match['octave']
-                if self.clef_line == None:
-                    self.clef_line = self.default_lines[self.type]
-                else:
-                    self.clef_line = int(self.clef_line)
-                if self.octave == None:
-                    self.octave = 0
-                else:
-                    self.octave = int(self.octave)
+        for clef_name, setting in self.clef_names.items():
+            if s.startswith(clef_name):
+                self.type, self.clef_line = setting
+                self.octave = 0
+                if len(s) > len(clef_name):
+                    self.octave = int(s[len(clef_name):])
+                return
+        match = self.regex.match(s)
+        if match != None:
+            match = match.groupdict()
+            self.type = match['type']
+            self.clef_line = match['line']
+            self.octave = match['octave']
+            if self.clef_line == None:
+                self.clef_line = self.default_lines[self.type]
             else:
-                self.raise_error("Invalid clef name '%s'" % s)
+                self.clef_line = int(self.clef_line)
+            if self.octave == None:
+                self.octave = 0
+            else:
+                self.octave = int(self.octave)
+        else:
+            self.raise_error("Invalid clef name '%s'" % s)
 
 __all__ = ['clef']

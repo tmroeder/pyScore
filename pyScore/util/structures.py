@@ -18,6 +18,8 @@ Copyright (C) 2002 Michael Droettboom
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+from __future__ import generators
+
 from bisect import bisect_left, insort_left
 
 class SortedListSet(object):
@@ -182,6 +184,16 @@ class Grouper:
            bl = [b]
      self.data.append(al + bl)
 
+if not __builtins__.has_key("enumerate"):
+    def enumerate(collection):
+        """Backport to 2.2 of Python 2.3's enumerate function."""
+        i = 0
+        it = iter(collection)
+        while 1:
+            yield(i, it.next())
+            i += 1
+    __builtins__['enumerate'] = enumerate
+
 __all__ = """
-SortedListSet Grouper
+SortedListSet Grouper enumerate
 """.split()

@@ -1,5 +1,5 @@
 """
-Helpers for the scipts
+Helpers for the scripts
 Python GUIDO tools
 
 Copyright (C) 2002 Michael Droettboom
@@ -27,9 +27,12 @@ try:
    import textwrap
 except ImportError:
    from pyScore.util.backport import textwrap
+from pyScore.Guido import noteserver
 from os.path import splitext, split, join, exists, isdir, isfile
 import os
 import sys
+import traceback
+from urllib import urlencode
 
 class ConverterOptions:
    def __init__(self, input_format, output_format, extra_args=None, description=None):
@@ -98,54 +101,118 @@ def convert(modules, input_format, output_format,
       if callback:
          callback(options, filename, output)
 
+def _get_test_directories(test_dir, dir, groundtruth):
+   root_dir = join(test_dir, dir)
+   if not isdir(root_dir):
+      raise IOError("No test directory '%s'" % root_dir)
+   input_dir = join(root_dir, "input")
+   if not isdir(input_dir):
+      raise IOError("No test input directory '%s'" % test_root)
+   output_dir = join(root_dir, "output")
+   if not exists(output_dir):
+      os.mkdir(output_dir)
+   if not isdir(output_dir):
+      raise IOError("No test output directory '%s'" % output_dir)
+   gt_dir = join(root_dir, "groundtruth")
+   if groundtruth and not isdir(gt_dir):
+      raise IOError("No test groundtruth directory '%s'" % test_root)
+   return root_dir, input_dir, output_dir, gt_dir
+
+def document_lines(stream, filename, lines):
+   stream.write("\n")
+   stream.write(split(filename)[1])
+   stream.write("::\n\n")
+   for line in lines:
+      stream.write(textwrap.fill(line, initial_indent="  ", subsequent_indent="  "))
+      stream.write("\n")
+   stream.write("\n\n")
+
+def document_file(stream, filename):
+   document_lines(stream, filename, open(filename, "rU").readlines())
+   if filename.endswith("gmn"):
+      url = noteserver.get_url(open(filename, "rU").read())
+      stream.write(".. image:: %s\n\n" % url)
+
 def test(modules, test_dir, tests, groundtruth=False, callback=None):
-   if len(sys.argv) > 1:
-      if isdir(sys.argv[-1]):
-         test_dir = sys.argv[-1]
+   parser = OptionParser("\nusage: \%prog [--doc=documentation_dir] test_directory")
+   
+   parser.add_option("-d", "--doc", dest="doc",
+                     help="An optional documentation directory to generate documentation of this test")
+   (options, args) = parser.parse_args()
+
+   if len(args):
+      if isdir(args[0]):
+         test_dir = args[0]
    if not isdir(test_dir):
-      print "Test directory '%s' can not be found." % TEST_DIRECTORY
+      print "Test directory '%s' can not be found." % test_dir
       sys.exit(1)
+
+   make_documentation = False
+   if options.doc != None:
+      make_documentation = True
+      doc_dir = options.doc
+      if not isdir(doc_dir):
+         print "Documentation directory '%s' does not exist." % doc_dir
+      doc_fd = open(join(doc_dir, "tests.txt"), "wU")
+      doc_fd.write("Test results\n============\n\n.. contents::\n\n")
 
    from pyScore.convert import ConverterGraph
    converter = ConverterGraph(modules)
    groundtruth_warnings = []
-   for dir, input_format, output_format in tests:
-      root_dir = join(test_dir, dir)
-      if not isdir(root_dir):
-         raise IOError("No test directory '%s'" % root_dir)
-      input_dir = join(root_dir, "input")
-      if not isdir(input_dir):
-         raise IOError("No test input directory '%s'" % test_root)
-      output_dir = join(root_dir, "output")
-      if not exists(output_dir):
-         os.mkdir(output_dir)
-      if not isdir(output_dir):
-         raise IOError("No test output directory '%s'" % output_dir)
-      if groundtruth:
-         gt_dir = join(root_dir, "groundtruth")
-         if not isdir(gt_dir):
-            raise IOError("No test groundtruth directory '%s'" % test_root)
+   errors = []
+   for dir, input_format, output_format, title, description in tests:
+      root_dir, input_dir, output_dir, gt_dir = _get_test_directories(test_dir, dir, groundtruth)
       assert isinstance(input_format, Format)
       assert isinstance(output_format, Format)
       steps = converter.get_steps(input_format.converter, output_format.converter)
-      for filename in glob(join(input_dir, "*." + input_format.ext)):
+      if make_documentation:
+         doc_fd.write(title)
+         doc_fd.write("\n")
+         doc_fd.write("-" * len(title))
+         doc_fd.write("\n\n")
+         doc_fd.write(description)
+         doc_fd.write("\n\n")
+      files = glob(join(input_dir, "*." + input_format.ext))
+      files.sort()
+      for filename in files:
          root_filename = splitext(split(filename)[1])[0]
+         if make_documentation:
+            doc_fd.write(root_filename)
+            doc_fd.write("\n")
+            doc_fd.write("'" * len(root_filename))
+            document_file(doc_fd, filename)
          out_file = join(output_dir, root_filename + "." + output_format.ext)
          print "Converting '%s' to '%s'..." % (split(filename)[1], split(out_file)[1])
          sys.stdout.flush()
-         converter.run_steps(steps, filename, filename=out_file, warnings=True, verbose=True)
-         if callback:
-            callback(filename, out_file)
-         if groundtruth:
-            gt_file = join(gt_dir, root_filename + "." + output_format.ext)
-            if isfile(gt_file):
-               test_list = open(out_file, "rU").readlines()
-               gt_list = open(gt_file, "rU").readlines()
-               for a, b in zip(test_list, gt_list):
-                  if a.strip() != b.strip():
-                     groundtruth_warnings.append(out_file)
-                     break
+         try:
+            converter.run_steps(steps, filename, filename=out_file, warnings=True, verbose=True)
+            if make_documentation:
+               document_file(doc_fd, out_file)
+         except Exception, e:
+            errors.append("Exception from '%s':\n\n" % filename)
+            errors.extend(traceback.format_exception(*sys.exc_info()))
+            errors.append("\n")
+            if make_documentation:
+               document_lines(doc_fd, "Conversion caused an exception::\n\n",
+                              traceback.format_exception(*sys.exc_info()))
+         else:
+            if callback:
+               callback(filename, out_file)
+            if groundtruth:
+               gt_file = join(gt_dir, root_filename + "." + output_format.ext)
+               if isfile(gt_file):
+                  test_list = open(out_file, "rU").readlines()
+                  gt_list = open(gt_file, "rU").readlines()
+                  for a, b in zip(test_list, gt_list):
+                     if a.strip() != b.strip():
+                        groundtruth_warnings.append(out_file)
+                        if make_documentation:
+                           doc_fd.write("\n\n**Output does not match the groundtruth.**\n\n")
+                        break
 
+   if len(errors):
+      print textwrap.fill("ERROR: The following files caused exceptions during conversion:")
+      print "".join(errors)
    if len(groundtruth_warnings):
       print textwrap.fill("WARNING: The following files failed the groundtruth check:")
       print textwrap.fill(", ".join(groundtruth_warnings))

@@ -1,0 +1,100 @@
+=======
+pyScore
+=======
+
+(c) 2004 Michael Droettboom
+
+Various Python tools for working with symbolic music notation.
+
+.. contents::
+
+Features
+========
+
+Currently, the only features are:
+
+- Guido_ normalization
+- Extracting absolute times for Guido_ events
+- Guido_ to MusicXML_ conversion
+- MusicXML_ to Guido_ conversion
+
+.. _Guido: http://www.noteserver.org/
+.. _MusicXML: http://www.musicxml.com/
+
+Download
+========
+
+%(downloads)s
+
+You can also `browse the CVS`__.
+
+.. __: http://dkc.jhu.edu/cgi-bin/cvsweb.cgi/pyScore/
+
+Release Notes
+=============
+
+Pertaining to latest release (%(version)s):
+
+%(release_notes)s
+
+Test results
+============
+
+There are some automatically generated `test results`__ that
+demonstrate the abilities of the system.  
+
+It is not expected at this point that the output is entirely correct.
+If you see a long URL displayed beginning with
+``http://tempo.iti.informatik.tu-darmstadt.de/``, that means the Guido
+NoteServer choked on what was being sent to it.  The XML is extremely
+hard to read at the moment because I haven't got around to
+pretty-printing it yet.
+
+.. __: tests.html
+
+Installation
+============
+
+Building and installing from source
+-----------------------------------
+
+To build and install this package, use the regular Python distutils
+method::
+
+  python setup.py build
+  python setup.py install
+
+If you do not have a compiler available, you can use the
+``--no-compiler`` build flag.  pyScore will still work, but will run
+much slower::
+
+  python setup.py build --no-compiler
+  python setup.py install
+
+On Mac OS-X, you probably want to install the scripts somewhere reasonable::
+
+  python setup.py install --install-scripts=/usr/local/bin
+
+Binary installers
+-----------------
+
+No binary installers available yet.
+
+Acknowledgements
+================
+
+This package includes local copies of other third-party packages, so
+that it can be installed on a vanilla Python system.  I'd like to
+thank these über-programmers for their great work:
+
+- ElementTree__ by Frederich Lundh
+
+.. __: http://effbot.org/zone/element-index.htm
+
+- cRat__ by Christopher A. Craig
+
+.. __: http://cvs.sourceforge.net/viewcvs.py/pythonic/crat/
+
+-  Rat__ by Sjoerd Mullender
+
+.. __: http://cvs.sourceforge.net/viewcvs.py/python/python/dist/src/Demo/classes/Rat.py

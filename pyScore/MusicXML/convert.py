@@ -19,9 +19,12 @@ Copyright (C) 2004 Michael Droettboom
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 from pyScore.Guido.objects import core
-from pyScore.elementtree.ElementTree import ElementTree, iselement
+from pyScore.Guido.objects.basic import all as basic
+from pyScore.Guido.objects.advanced import all as advanced
+from pyScore.elementtree.ElementTree import ElementTree, iselement, parse
 from pyScore.util.file_wrapper import *
 from guido_to_musicxml import GuidoToMusicXML
+from musicxml_to_guido import MusicXMLToGuido
 
 from types import StringType, UnicodeType
 
@@ -39,17 +42,16 @@ def xml_elementtree_to_xml_file(tree, filename=None, output_encoding="ascii"):
    ElementTree(tree).write(FileWriter(filename, output_encoding), output_encoding)
 
 def xml_file_to_xml_elementtree(file):
-   tree = ElementTree.parse(file)
+   tree = parse(file)
    return tree.getroot()
 
 def xml_elementtree_to_musicxml_elementtree(tree):
-   # TODO: Validate against DTD
    assert iselement(tree)
    return tree
 
 def musicxml_elementtree_to_guido_tree(tree, warnings=False, verbose=False):
    assert iselement(tree)
-   converter = MusicXMLToGuido(warnings=warnings, verbose=verbose)
+   converter = MusicXMLToGuido((core, basic, advanced), warnings=warnings, verbose=verbose)
    return converter.convert(tree)
 
 inputs = ["guido_tree", "musicxml_elementtree", "xml_elementtree", "xml_file"]

@@ -1,26 +1,171 @@
+=======
 pyScore
+=======
 
 (c) 2004 Michael Droettboom
 
 Various Python tools for working with symbolic music notation.
 
+.. contents::
+
+Features
+========
+
 Currently, the only features are:
 
-- Guido normalization
-- Guido -> MusicXML conversion
+- Guido_ normalization
+- Extracting absolute times for Guido_ events
+- Guido_ to MusicXML_ conversion
+- MusicXML_ to Guido_ conversion
 
+.. _Guido: http://www.noteserver.org/
+.. _MusicXML: http://www.musicxml.com/
+
+Download
+========
+
+- `pyScore-0.1.tar.bz2 <pyScore-0.1.tar.bz2>`_ (124420 bytes)
+- `pyScore-0.1.tar.gz <pyScore-0.1.tar.gz>`_ (153222 bytes)
+- `pyScore-0.1.zip <pyScore-0.1.zip>`_ (243668 bytes)
+
+
+You can also `browse the CVS`__.
+
+.. __: http://dkc.jhu.edu/cgi-bin/cvsweb.cgi/pyScore/
+
+Release Notes
+=============
+
+Pertaining to latest release (0.1):
+
+Notes
+-----
+
+- arguments to Guido beams are ignored [beam_stem.py]
+
+- MusicXML doesn't seem to have a way to support Guido \\headsReverse [guido_to_musicxml.py]
+
+- Guido \\noteFormat tag is completely unsupported [guido_to_musicxml.py]
+
+- Guido \\splitChord tag is completely unsupported [guido_to_musicxml.py]
+
+- In GUIDO, barlines are "global": i.e. they affect all parts.  Therefore, we merge all barlines, but warn if there are barlines in subsequent parts that do not match those in the previous parts. [guido_to_musicxml.py]
+
+- Cross-staff beaming doesn't seem to work [guido_to_musicxml.py]
+
+- Guido doesn't have named parts like MusicXML, so we grab it from the \\instrument tag [guido_to_musicxml.py]
+
+- trills, turns and mordents are much less specific in MusicXML than in GUIDO, so pitch name (but not the accidental) of auxiliary notes are thrown out, as well as any duration for the ornament [guido_to_musicxml.py]
+
+- There is no way to represent <senza-misura> and type="single-number" [musicxml_to_guido.py]
+
+Bugs or shortcomings in other systems
+-------------------------------------
+
+- Note-level dynamics do not seem to work in Turandot [guido_to_musicxml.py]
+
+- tremolos don't seem to work in Turandot [guido_to_musicxml.py]
+
+- secondary beaming doesn't seem to work in Turandot [guido_to_musicxml.py]
+
+- Elisions don't work correctly in Turandot. [guido_to_musicxml.py]
+
+- ornaments don't seem to work in Turandot [guido_to_musicxml.py]
+
+- Turandot doesn't seem to handle changing clefs mid-stream [guido_to_musicxml.py]
+
+- System breaks don't work in Turandot. [guido_to_musicxml.py]
+
+- multiple repeat endings do not seem to work in Turandot [guido_to_musicxml.py]
+
+- tempo tags don't seem to work in Turandot [guido_to_musicxml.py]
+
+- Octave shift does not seem to work with Turandot [guido_to_musicxml.py]
+
+To-dos
+------
+
+- document GuidoToMusicXML.make_plan because it's really hairy [guido_to_musicxml.py]
+
+- support word-based (as opposed to wedge-based) *cresc.* and *dim.* [guido_to_musicxml.py]
+
+- deal with time-wise MusicXML scores (e.g. use Michael Good's XSLT transform first) [musicxml_to_guido.py]
+
+- MusicXML -> Guido ornament handling [musicxml_to_guido.py]
+
+- check that we have ``xmllint`` and use it [validate.py]
+
+- add support for custom namespace resolvers/default namespaces [ElementTree.py]
+
+- add support for incremental parsing [ElementTree.py]
+
+Longer-term plans
+-----------------
+
+- Finish support for conversion from MusicXML to Guido [musicxml_to_guido.py]
+
+- Possibly switch to another XML toolkit to support transformation and validation directly from Python [validate.py]
+
+
+
+Test results
+============
+
+There are some automatically generated `test results`__ that
+demonstrate the abilities of the system.  
+
+It is not expected at this point that the output is entirely correct.
+If you see a long URL displayed beginning with
+``http://tempo.iti.informatik.tu-darmstadt.de/``, that means the Guido
+NoteServer choked on what was being sent to it.  The XML is extremely
+hard to read at the moment because I haven't got around to
+pretty-printing it yet.
+
+.. __: tests.html
+
+Installation
+============
+
+Building and installing from source
+-----------------------------------
 
 To build and install this package, use the regular Python distutils
-method:
+method::
 
   python setup.py build
   python setup.py install
 
+If you do not have a compiler available, you can use the
+``--no-compiler`` build flag.  pyScore will still work, but will run
+much slower::
+
+  python setup.py build --no-compiler
+  python setup.py install
+
+On Mac OS-X, you probably want to install the scripts somewhere reasonable::
+
+  python setup.py install --install-scripts=/usr/local/bin
+
+Binary installers
+-----------------
+
+No binary installers available yet.
+
+Acknowledgements
+================
 
 This package includes local copies of other third-party packages, so
 that it can be installed on a vanilla Python system.  I'd like to
-thank these uber-programmers for their great work:
+thank these über-programmers for their great work:
 
-  ElementTree by Frederich Lundh
-  cRat by Christopher A. Craig
-  Rat by Sjoerd Mullender
+- ElementTree__ by Frederich Lundh
+
+.. __: http://effbot.org/zone/element-index.htm
+
+- cRat__ by Christopher A. Craig
+
+.. __: http://cvs.sourceforge.net/viewcvs.py/pythonic/crat/
+
+-  Rat__ by Sjoerd Mullender
+
+.. __: http://cvs.sourceforge.net/viewcvs.py/python/python/dist/src/Demo/classes/Rat.py

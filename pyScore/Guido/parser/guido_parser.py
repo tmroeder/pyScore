@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 from __future__ import generators
 from lexer import Token, Tokenizer, WrongToken
 from pyScore.Guido.objects import core
+from pyScore.Guido.tree_builder import GuidoTreeBuilder
 try:
     import textwrap
 except ImportError:
@@ -156,8 +157,8 @@ class GuidoParser:
         self.unknown_tags = {}
         self.active_tags = []
         tokens = GuidoTokenizer(self.s)
-        self.current_collection = core.Score(tokens.current_position)
-        tokens = self.top(tokens)
+        builder = GuidoTreeBuilder(self._tag_factory)
+        tokens = self.top(tokens, builder)
         if self._warnings:
             if not tokens.at_end():
                 sys.stderr.write("WARNING: Extra text at end of file\n")
@@ -165,41 +166,9 @@ class GuidoParser:
                 sys.stderr.write("WARNING: Unknown tags:\n")
                 sys.stderr.write(textwrap.fill(', '.join(['\\' + x for x in self.unknown_tags.keys()])))
                 sys.stderr.write("\n")
-        return self.current_collection
+        return builder.score
 
-    def _add(self, obj):
-        """Adds an object to the current part."""
-        self.current_collection.append(obj)
-        for tag in self.active_tags:
-            tag.tag(obj)
-
-    def _set_as_collection(self, collection, add=True):
-        if add:
-            self._add(collection)
-        last_collection = self.current_collection
-        self.current_collection = collection
-        return last_collection
-
-    def _reset_collection(self, collection):
-        self.current_collection = collection
-
-    def _add_active_tag(self, tag_obj):
-        assert isinstance(tag_obj, core.TAG)
-        self.active_tags.append(tag_obj)
-
-    def _remove_active_tag(self, tag_obj, tokens):
-        assert isinstance(tag_obj, core.TAG)
-        for i in range(len(self.active_tags) - 1, -1, -1):
-            if (self.active_tags[i].name == tag_obj.name and
-                self.active_tags[i].id == tag_obj.id):
-                assert self.active_tags[i].mode == "Begin"
-                del self.active_tags[i]
-                return
-        tokens.raise_error_wrong_token(
-            "'\\%sEnd' appears before '\\%sBegin'" %
-            (tag_obj.name, tag_obj.name))
-
-    def FILE(self, tokens):
+    def FILE(self, tokens, builder):
         """The top-level parsing node.  Initializes state and begins parsing
         a GUIDO document."""
         # This will accumulate a set of tags we've parsed that we don't
@@ -207,19 +176,19 @@ class GuidoParser:
         # defined.
         self.trace("FILE", tokens)
         try:
-            tokens = self.SEGMENT(tokens.copy())
+            tokens = self.SEGMENT(tokens.copy(), builder)
         except WrongToken:
-            tokens = self.SEQUENCE(tokens)
+            tokens = self.SEQUENCE(tokens, builder)
         return tokens
     top = FILE
 
-    def SEGMENT(self, tokens):
+    def SEGMENT(self, tokens, builder):
         self.trace("SEGMENT", tokens)
         tokens.match(tokens.SegmentStart)
-        last_collection = self._set_as_collection(core.Segment(
-            tokens.current_position.get_last()))
+        # builder.set_as_collection(core.Segment(tokens.current_position.get_last()))
+        builder.begin_Segment(tokens.current_position.get_last())
         try:
-            tokens = self.SEQUENCE(tokens.copy())
+            tokens = self.SEQUENCE(tokens.copy(), builder)
         except WrongToken:
             pass
         while 1:
@@ -227,41 +196,43 @@ class GuidoParser:
                 tokens.match(tokens.Comma)
             except WrongToken:
                 break
-            tokens = self.SEQUENCE(tokens)
+            tokens = self.SEQUENCE(tokens, builder)
         tokens.match(tokens.SegmentEnd)
-        self._reset_collection(last_collection)
+        # builder.reset_collection()
+        builder.end_Segment()
         return tokens
 
-    def SEQUENCE(self, tokens):
+    def SEQUENCE(self, tokens, builder):
         self.trace("SEQUENCE", tokens)
         tokens.match(tokens.SequenceStart)
-        last_collection = self._set_as_collection(core.Sequence(
-            pos=tokens.current_position.get_last()))
+        # builder.set_as_collection(core.Sequence(pos=tokens.current_position.get_last()))
+        builder.begin_Sequence()
         self.last_note = self.default_note
-        tokens = self.VOICE(tokens)
+        tokens = self.VOICE(tokens, builder)
         tokens.match(tokens.SequenceEnd)
-        self._reset_collection(last_collection)
+        # builder.reset_collection()
+        builder.end_Sequence()
         return tokens
 
-    def VOICE(self, tokens):
+    def VOICE(self, tokens, builder):
         self.trace("VOICE", tokens)
         while 1:
             try:
-                tokens = self.BARLINE(tokens.copy())
+                tokens = self.BARLINE(tokens.copy(), builder)
             except WrongToken:
                 try:
-                    tokens = self.EVENT(tokens.copy())
+                    tokens = self.EVENT(tokens.copy(), builder)
                 except WrongToken:
                     try:
-                        tokens = self.CHORD(tokens.copy())
+                        tokens = self.CHORD(tokens.copy(), builder)
                     except WrongToken:
                         try:
-                            tokens = self.TAG(tokens.copy(), self.VOICE)
+                            tokens = self.TAG(tokens.copy(), builder, self.VOICE)
                         except WrongToken:
                             break
         return tokens
 
-    def EVENT(self, tokens):
+    def EVENT(self, tokens, builder):
         """Parses a note, rest or empty."""
         self.trace("EVENT", tokens)
         note = tokens.match(tokens.Note)
@@ -288,23 +259,34 @@ class GuidoParser:
         self.last_note = note
 
         # Create the note or rest object
-        note_obj = core.EventFactory(
-            note['pitch_name'],
-            int(note['octave1']),
-            note['accidental'],
-            int(note['num']),
-            int(note['den']),
-            len(note['dotting']),
-            pos=tokens.current_position.get_last())
+##         note_obj = core.EventFactory(
+##             note['pitch_name'],
+##             int(note['octave1']),
+##             note['accidental'],
+##             int(note['num']),
+##             int(note['den']),
+##             len(note['dotting']),
+##             pos=tokens.current_position.get_last())
 
-        self._add(note_obj)
+##         builder.add(note_obj)
+
+        builder.add_Event(note['pitch_name'],
+             int(note['octave1']),
+             note['accidental'],
+             int(note['num']),
+             int(note['den']),
+             len(note['dotting']),
+             pos=tokens.current_position.get_last())
         return tokens
 
-    def TAG(self, tokens, inner):
+    def TAG(self, tokens, builder, inner):
         """Parse a tag."""
         self.trace("TAG", tokens)
         tag = tokens.match(tokens.Tag)
-        tag_obj = self._tag_factory(
+##         tag_obj = self._tag_factory(
+##             tag['name'], tag['id'], tag['args'],
+##             pos=tokens.current_position.get_last())
+        tag_obj = builder.add_Tag(
             tag['name'], tag['id'], tag['args'],
             pos=tokens.current_position.get_last())
 
@@ -316,73 +298,72 @@ class GuidoParser:
             self.unknown_tags[tag['name']] = None
 
         if tag_obj.mode == "Begin":
-            self._add(tag_obj)
-            self._add_active_tag(tag_obj)
+            pass
         elif tag_obj.mode == "End":
-            self._remove_active_tag(tag_obj, tokens)
-            self._add(tag_obj)
             try:
-                tokens = self.TAG_GROUPING(tokens.copy(), tag_obj, inner)
+                tokens = self.TAG_GROUPING(tokens.copy(), builder, tag_obj, inner)
             except WrongToken:
                 pass
         else:
-            self._add(tag_obj)
             try:
-                tokens = self.TAG_GROUPING(tokens.copy(), tag_obj, inner)
+                tokens = self.TAG_GROUPING(tokens.copy(), builder, tag_obj, inner)
             except WrongToken:
                 pass
         return tokens
 
-    def TAG_GROUPING(self, tokens, tag_obj, middle):
+    def TAG_GROUPING(self, tokens, builder, tag_obj, middle):
         self.trace("TAG_GROUPING", tokens)
         tokens.match(tokens.GroupingStart)
         tag_obj.mode = "Begin"
         tag_obj.use_parens = True
-        self._add_active_tag(tag_obj)
-        tokens = middle(tokens.copy())
+        builder.add_active_tag(tag_obj)
+        tokens = middle(tokens.copy(), builder)
         tokens.match(tokens.GroupingEnd)
         # Can't pop, because we might have Begin and End tags overlapping this one
-        self._remove_active_tag(tag_obj, tokens)
+        builder.remove_active_tag(tag_obj)
         tag = copy(tag_obj)
         tag.mode = "End"
         tag.events = []
-        self._add(tag)
+        builder.add(tag)
         return tokens
 
-    def CHORD(self, tokens):
+    def CHORD(self, tokens, builder):
         self.trace("CHORD", tokens)
         tokens.match(tokens.ChordStart)
-        last_collection = self._set_as_collection(core.Chord(
-            pos=tokens.current_position.get_last()))
-        tokens = self.CHORD_VOICE(tokens.copy())
+##         builder.set_as_collection(core.Chord(
+##             pos=tokens.current_position.get_last()))
+        builder.begin_Chord(pos=tokens.current_position.get_last())
+        tokens = self.CHORD_VOICE(tokens.copy(), builder)
         while 1:
             try:
                 tokens.match(tokens.Comma)
             except WrongToken:
                 break
-            tokens = self.CHORD_VOICE(tokens)
+            tokens = self.CHORD_VOICE(tokens, builder)
         tokens.match(tokens.ChordEnd)
-        self._reset_collection(last_collection)
+##         builder.reset_collection()
+        builder.end_Chord()
         return tokens
 
-    def CHORD_VOICE(self, tokens):
+    def CHORD_VOICE(self, tokens, builder):
         self.trace("CHORD_VOICE", tokens)
         try:
-            tokens = self.EVENT(tokens.copy())
+            tokens = self.EVENT(tokens.copy(), builder)
         except WrongToken:
             while 1:
                 try:
-                    tokens = self.TAG(tokens.copy(), self.CHORD_VOICE)
+                    tokens = self.TAG(tokens.copy(), builder, self.CHORD_VOICE)
                 except WrongToken:
                     break
         return tokens
 
-    def BARLINE(self, tokens):
+    def BARLINE(self, tokens, builder):
         self.trace("BARLINE", tokens)
         if not tokens.match(tokens.Barline):
             return 1
-        barline = core.Barline(
-            pos=tokens.current_position.get_last())
-        self._add(barline)
+##         barline = core.Barline(
+##             pos=tokens.current_position.get_last())
+##         builder.add(barline)
+        builder.add_Barline(pos=tokens.current_position.get_last())
         return tokens
         

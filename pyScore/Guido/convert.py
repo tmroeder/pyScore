@@ -47,7 +47,7 @@ def guido_tree_to_guido_string(score, output_encoding="utf8"):
 
 def guido_tree_to_guido_file(score, filename=None, output_encoding="utf8"):
    assert isinstance(score, core.Score)
-   output = FileWriter(filename, input_encoding)
+   output = FileWriter(filename, output_encoding)
    score.write_guido(output)
 
 inputs = ["guido_file", "guido_string", "guido_tree"]

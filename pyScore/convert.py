@@ -32,14 +32,17 @@ class ConverterGraph:
             self.inputs[input] = {}
          for output in module.outputs:
             self.outputs.append(output)
+      converters = {}
       for input in self.inputs.keys():
          for output in self.outputs:
             for module in modules:
                converter_name = "%s_to_%s" % (input, output)
                if hasattr(module, converter_name):
-                  if self.inputs[input].has_key(output):
+                  converter = getattr(module, converter_name)
+                  if not converters.has_key(converter) and self.inputs[input].has_key(output):
                      raise ValueError(
                         "Multiple direct routes from '%s' to '%s'." % (input, output))
+                  converters[converter] = None
                   self.inputs[input][output] = getattr(module, converter_name)
 
    def get_steps(self, input, output, tried=[]):

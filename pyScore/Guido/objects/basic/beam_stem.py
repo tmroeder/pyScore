@@ -23,7 +23,7 @@ from pyScore.Guido.objects.core import TAG, Note
 class beam(TAG):
     def __init__(self, name, id, args_list, args_dict, *args, **kwargs):
        TAG.__init__(self, name, id, args_list, args_dict, *args, **kwargs)
-       # NOTE: arguments to GUIDO beams are ignored
+       # NOTE: arguments to Guido beams are ignored
 
 bm = beam
 
