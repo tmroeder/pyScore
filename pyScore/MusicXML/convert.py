@@ -19,10 +19,10 @@ Copyright (C) 2004 Michael Droettboom
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 from pyScore.config import config
+from pyScore import ElementTree 
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic import all as basic
 from pyScore.Guido.objects.advanced import all as advanced
-from pyScore.elementtree.ElementTree import ElementTree, iselement, parse
 from pyScore.util.file_wrapper import *
 from pyScore.__version__ import *
 
@@ -41,23 +41,25 @@ def Guido_tree_to_MusicXML_tree(score):
    return converter.convert(score)
 
 def MusicXML_tree_to_MusicXML_file(tree, filename=None):
-   assert iselement(tree)
+   assert ElementTree.iselement(tree)
    output_encoding = config.get("xml_encoding")
-   ElementTree(tree).write(FileWriter(
-      filename, output_encoding),
-                           output_encoding, created,
-      '<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 1.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">')
+   writer = FileWriter(filename, output_encoding)
+   writer.write("<?xml version='1.0' encoding='%s'?>\n" % output_encoding)
+   writer.write("<!-- %s -->\n" % created)
+   writer.write('<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 1.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">\n')
+
+   ElementTree.ElementTree(tree).write(writer)
    if config.get("dtd"):
       validate(filename)
 
 def MusicXML_file_to_MusicXML_tree(file):
    if config.get("dtd") and type(file) in (StringType, UnicodeType):
       validate(file)
-   tree = parse(file)
+   tree = ElementTree.parse(file)
    return tree.getroot()
 
 def MusicXML_tree_to_Guido_tree(tree):
-   assert iselement(tree)
+   assert ElementTree.iselement(tree)
    converter = MusicXMLToGuido((core, basic, advanced))
    return converter.convert(tree)
 

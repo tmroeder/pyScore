@@ -21,7 +21,7 @@ Copyright (C) 2004 Michael Droettboom
 # PLAN: Finish support for conversion from MusicXML to Guido
 
 from pyScore.config import config
-from pyScore.elementtree.ElementTree import iselement, tostring
+from pyScore import ElementTree
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic import all as basic
 from pyScore.Guido.objects.advanced import all as advanced
@@ -51,6 +51,8 @@ class MusicXMLToGuido:
          self.wedges = {}
          self.lyrics = None
          self.voice = 1
+         self.time_spines = {}
+         self.guido_durations = {}
 
    def dispatch_element(self, element, builder, state):
       """Given a MusicXML element <x>, dispatches a call to a method named element_x"""
@@ -64,7 +66,7 @@ class MusicXMLToGuido:
 
    def convert(self, tree):
       # TODO: deal with time-wise MusicXML scores (e.g. use Michael Good's XSLT transform first)
-      assert iselement(tree)
+      assert ElementTree.iselement(tree)
       builder = GuidoTreeBuilder(self._tags)
       state = self.State()
       self.make_sequences(tree, builder, state)
@@ -119,8 +121,10 @@ class MusicXMLToGuido:
             time_spine += last_duration
          if element.tag == "attributes":
             state.divisions = int(element.findtext("./divisions") or state.divisions)
-         element.time_spine = time_spine
-         element.guido_duration = Rat(0, 1)
+         state.time_spines[element] = time_spine
+         # element.time_spine = time_spine
+         state.guido_durations[element] = Rat(0, 1)
+         # element.guido_duration = Rat(0, 1)
          duration = element.findtext("./duration")
          if element.tag == "backup":
             time_spine -= self.m2g_duration(int(duration), state.divisions)
@@ -128,20 +132,21 @@ class MusicXMLToGuido:
             time_spine += self.m2g_duration(int(duration), state.divisions)
          else:
             if duration != None:
-               element.guido_duration = self.m2g_duration(int(duration), state.divisions)
+               state.guido_durations[element] = self.m2g_duration(int(duration), state.divisions)
             elements.append(element)
-         last_duration = element.guido_duration
-      
-      elements.sort(lambda x, y: cmp(x.time_spine, y.time_spine))
+         last_duration = state.guido_durations[element]
+
+      time_spines = state.time_spines
+      elements.sort(lambda x, y: cmp(time_spines[x], time_spines[y]))
 
       time_spine = Rat(0, 1)
       for element in elements:
-         if element.time_spine > time_spine:
-            difference = element.time_spine - time_spine
+         if state.time_spines[element] > time_spine:
+            difference = state.time_spines[element] - time_spine
             builder.add_Empty(difference.num, difference.den)
-            time_spine = element.time_spine
+            time_spine = state.time_spines[element]
          self.dispatch_element(element, builder, state)
-         time_spine += element.guido_duration
+         time_spine += state.guido_durations[element]
       builder.add_Barline()
 
    ########################################
@@ -224,7 +229,7 @@ class MusicXMLToGuido:
             self.begin_beam(element, builder, state)
             self.begin_notations(element, builder, state)
             self.begin_lyric(element, builder, state)
-         duration = element.guido_duration
+         duration = state.guido_durations[element]
          pitch_tag = element.find("./pitch")
          rest_tag = element.find("./rest")
          if pitch_tag != None:

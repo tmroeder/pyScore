@@ -19,7 +19,7 @@ Copyright (C) 2002 Michael Droettboom
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 from pyScore.config import config
-from pyScore.elementtree.ElementTree import iselement, parse, ElementTree
+from pyScore import ElementTree 
 from pyScore.util.file_wrapper import *
 from pyScore.__version__ import *
 
@@ -38,32 +38,35 @@ config.add_option("", "--dtd", action="store_true", help="[xml] validate against
 def MidiXML_file_to_MidiXML_tree(file):
    if config.get("dtd") and type(file) in (StringType, UnicodeType):
       validate(file)
-   tree = parse(file)
+   tree = ElementTree.parse(file)
    return tree.getroot()
 
 def MusicXML_tree_to_MidiXML_tree(tree):
-   assert iselement(tree)
+   assert ElementTree.iselement(tree)
    converter = MusicXMLToMidiXML()
    return converter.convert(tree)
 
 def MidiXML_tree_to_MidiXML_file(tree, filename=None):
-   assert iselement(tree)
+   assert ElementTree.iselement(tree)
    output_encoding = config.get("xml_encoding")
-   ElementTree(tree).write(FileWriter(
-      filename, output_encoding), output_encoding, created,
-                           '<!DOCTYPE MIDIFile PUBLIC "-//Recordare//DTD MusicXML 1.0 MIDI//EN" "http://www.musicxml.org/dtds/midixml.dtd">')
+   writer = FileWriter(filename, output_encoding)
+   writer.write("<?xml version='1.0' encoding='%s'?>\n" % output_encoding)
+   writer.write("<!-- %s -->\n" % created)
+   writer.write('<!DOCTYPE MIDIFile PUBLIC "-//Recordare//DTD MusicXML 1.0 MIDI//EN" "http://www.musicxml.org/dtds/midixml.dtd">\n')
+
+   ElementTree.ElementTree(tree).write(writer)
    if config.get("dtd"):
       validate(filename)
 
 def MidiXML_tree_to_MIDI_stream(tree):
-   assert iselement(tree)
+   assert ElementTree.iselement(tree)
    converter = MidiXMLToMidi()
    stream = StringIO()
    converter.convert(tree, stream)
    return stream.getvalue()
 
 def MidiXML_tree_to_MIDI_file(tree, filename=None):
-   assert iselement(tree)
+   assert ElementTree.iselement(tree)
    converter = MidiXMLToMidi()
    converter.convert(tree, open(filename, "wb"))
 

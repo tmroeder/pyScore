@@ -14,13 +14,13 @@ while exists("pyScore-%08d.profile" % i):
    i += 1
 profile_file = "pyScore-%08d.profile" % i
 
-TEST_DIRECTORY = "profile"
+TEST_DIRECTORY = "profile" 
 tests = [
-   ("Guido", Format("Guido", "gmn", "guido_file"),
-    Format("MusicXML", "xml", "musicxml_file"),
+   ("Guido", Format("Guido", "gmn", "Guido_file"),
+    Format("MusicXML", "xml", "MusicXML_file"),
     "", ""),
-   ("MusicXML", Format("MusicXML", "xml", "musicxml_file"),
-    Format("Guido", "gmn", "guido_file"),
+   ("MusicXML", Format("MusicXML", "xml", "MusicXML_file"),
+    Format("Guido", "gmn", "Guido_file"),
     "", "")
 ]
 

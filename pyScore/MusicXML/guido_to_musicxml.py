@@ -18,9 +18,8 @@ Copyright (C) 2002 Michael Droettboom
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from pyScore.elementtree.ElementTree import Element, SubElement, tostring
-
 from pyScore.config import config
+from pyScore import ElementTree
 from pyScore.util.structures import *
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic.staff import staff as staff_tag
@@ -30,7 +29,9 @@ from pyScore.util.rational import Rat
 from pyScore.util.config import *
 
 import sys
-from types import *
+
+Element = ElementTree.Element
+SubElement = ElementTree.SubElement
 
 # NOTE: MusicXML doesn't seem to have a way to support Guido \\headsReverse
 # NOTE: Guido \\noteFormat tag is completely unsupported
@@ -68,7 +69,7 @@ the Guido stream, such as stem direction..."""
 
    def __init__(self):
       self._divisions = config.get("divisions")
-      assert type(self._divisions) == IntType
+      assert type(self._divisions) == int
       self._quarter_divisions = self._divisions * 4
       self._warnings = config.get("warnings")
       self._verbose = config.get("verbose")
@@ -82,7 +83,7 @@ the Guido stream, such as stem direction..."""
 
       self.last_ending = None
 
-      self.root = score_partwise = Element("score-partwise")
+      self.root = score_partwise = ElementTree.Element("score-partwise")
       SubElement(score_partwise, "work")
       SubElement(score_partwise, "identification")
 
@@ -207,14 +208,16 @@ the Guido stream, such as stem direction..."""
             direction = SubElement(measure, "direction")
             self.dispatch_tag(item, measure, direction, state)
             if not len(direction):
-               measure.remove(direction)
+               if hasattr(measure, 'remove'):
+                  measure.remove(direction)
             else:
                if item.parent.voice != None:
                   sound = direction.find("./sound")
                   SubElement(direction, "voice").text = str(item.parent.voice)
                   if sound is not None:
-                     direction.remove(sound)
-                     direction.append(sound)
+                     if hasattr(direction, 'remove'):
+                        direction.remove(sound)
+                        direction.append(sound)
          if isinstance(item, (core.Barline, core.DURATIONAL)):
             if (state.measure_no < len(barlines) and
                 item.time_spine >= barlines[state.measure_no]):
@@ -722,3 +725,4 @@ the Guido stream, such as stem direction..."""
       SubElement(direction_type, "octave-shift",
                  type = "stop")
       
+ 

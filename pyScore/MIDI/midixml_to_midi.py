@@ -18,8 +18,7 @@ Copyright (C) 2004 Michael Droettboom
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from pyScore.config import config
-from pyScore.elementtree.ElementTree import Element, SubElement, tostring
+from pyScore.config import config 
 from pyScore.MIDI.conversion_constants import *
 from pyScore.util.range_checking import *
 from midi_codes import *
