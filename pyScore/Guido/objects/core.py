@@ -20,19 +20,17 @@ Copyright (C) 2004 Michael Droettboom
 
 from __future__ import generators
 
-from pyScore.util.Rat import Rat
+from pyScore.util.rational import Rat
+from pyScore.Guido.parser.lexer import ParseError, Position
+from pyScore.util.structures import SortedListSet
+
+from inspect import isclass
+import re
+import sys
 try:
     import textwrap
 except ImportError:
     from pyScore.util.backport import textwrap
-from pyScore.Guido.parser.lexer import ParseError, Position
-from pyScore.util.structures import SortedListSet
-
-from inspect import isclass, ismethod, getmro
-from math import log
-from new import classobj, instancemethod, function
-import re
-import sys
 from types import *
 
 class GuidoError(Exception):
@@ -46,20 +44,6 @@ class GUIDO_OBJECT(object):
         self.tags = {}
         self.parent = None
         self.time_spine = Rat(0, 1)
-
-    class MethodWrapper:
-        def __init__(self, func, inst):
-            self.func = function(func.im_func.func_code,
-                                 func.im_func.func_globals,
-                                 func.__name__)
-            self.inst = inst
-            self.__name__ = self.func.__name__
-
-        def __call__(self, *args, **kw):
-            return self.func(self.inst, *args, **kw)
-
-    def _dummy(*args, **kwargs):
-        pass
 
     def write_guido(self, stream, state={}):
         stream.write("[ERROR! Undefined GUIDO object in stream.]")
@@ -228,24 +212,6 @@ class DURATIONAL(GUIDO_OBJECT):
             self._den = new_dur.den
             self._dotting = 1
         return
-
-        dur = Rat(self._num, self._den)
-        new_dur = dur / self.one_dot
-        if new_dur.num == 1:
-            den = log(new_dur.den) / log(2)
-            if den == int(den):
-                self._num = new_dur.num
-                self._den = new_dur.den
-                self._dotting = 1
-                return
-        new_dur = dur / self.two_dots
-        den = log(new_dur.den)
-        if new_dur.num == 1:
-            den = log(new_dur.den) / log(2)
-            if den == int(den):
-                self._num = new_dur.num
-                self._den = new_dur.den
-                self._dotting = 2
 
     def get_duration(self):
         if self._dotting == 0:

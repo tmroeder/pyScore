@@ -2,8 +2,6 @@
 
 import profile
 
-#!/usr/bin/env python
-
 from pyScore.util.script_helpers import *
 from pyScore.MusicXML.validate import validate
 import pyScore.MusicXML.convert
@@ -21,6 +19,11 @@ tests = [
    ("Guido", Format("Guido", "gmn", "guido_file"),
     Format("MusicXML", "xml", "xml_file")),
 ]
+if exists(sys.argv[-1]):
+   TEST_DIRECTORY = sys.argv[-1]
+if not exists(TEST_DIRECTORY):
+   print "Profiling directory '%s' can not be found." % TEST_DIRECTORY
+   sys.exit(1)
 
 def callback(input_file, output_file):
 ##    if output_file.endswith("xml"):

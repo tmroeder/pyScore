@@ -19,11 +19,14 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
-from distutils.core import setup
+from distutils.core import setup, Extension
 from distutils.sysconfig import get_python_lib, get_python_inc, PREFIX
 from glob import glob
-from os.path import walk, split, join
+from os.path import walk, split, join, isdir
 import sys
+
+########################################
+# Packages
 
 packages = []
 if sys.platform != 'win32':
@@ -34,7 +37,13 @@ else:
       packages.append(".".join(dirname.split("\\")))
 walk("pyScore", visit, ())
 
-scripts = glob(join("scripts", "*"))
+########################################
+# Scripts
+
+scripts = [x for x in glob(join("scripts", "*")) if not isdir(x)]
+
+########################################
+# Data
 
 lib_path = get_python_lib()[len(PREFIX)+1:]
 data_dirs = ["pyScore.MusicXML.DTD", "pyScore.MusicXML.XSLT"]
@@ -45,6 +54,12 @@ for dir in data_dirs:
    files = glob(join(dir, "*.*"))
    data_files.append((join(lib_path, dir), files))
 
+########################################
+# Extensions
+
+extensions = [Extension("pyScore.util.crat", ["src/crat/cratmodule.c"],
+                        define_macros=[('NDEBUG', 1)])]
+
 setup(name = "pyScore",
       version = "0.1",
       url = "http://dkc.jhu.edu/~mdboom/",
@@ -52,4 +67,6 @@ setup(name = "pyScore",
       author_email = "mdboom@jhu.edu",
       packages = packages,
       scripts = scripts,
-      data_files = data_files)
+      data_files = data_files,
+      ext_modules=extensions
+      )

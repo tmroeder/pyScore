@@ -25,7 +25,7 @@ from pyScore.util.structures import *
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic.staff import staff as staff_tag
 from pyScore.Guido.objects.basic.instrument import instrument as instrument_tag
-from pyScore.util.Rat import Rat
+from pyScore.util.rational import Rat
 
 import sys
 

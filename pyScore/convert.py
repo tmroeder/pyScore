@@ -58,19 +58,13 @@ class ConverterGraph:
       raise ValueError(
          "There is no way to convert '%s' to '%s'." % (input, output))
 
-   def run_steps(self, steps, input, stream=sys.stdout, **kwargs):
-      stream.write(steps[0][1])
+   def run_steps(self, steps, input, **kwargs):
       for step, a, b in steps:
-         stream.write(" -> ")
-         stream.write(b)
-         stream.flush()
          new_dict = {}
          for key in getargspec(step)[0]:
             if kwargs.has_key(key):
                new_dict[key] = kwargs[key]
          input = step(input, **new_dict)
-      stream.write("\n")
-      stream.flush()
       return input
 
 def convert(input_format, output_format, input, stream=sys.stdout, **kwargs):

@@ -1,0 +1,26 @@
+pyScore
+
+(c) 2004 Michael Droettboom
+
+Various Python tools for working with symbolic music notation.
+
+Currently, the only features are:
+
+- Guido normalization
+- Guido -> MusicXML conversion
+
+
+To build and install this package, use the regular Python distutils
+method:
+
+  python setup.py build
+  python setup.py install
+
+
+This package includes local copies of other third-party packages, so
+that it can be installed on a vanilla Python system.  I'd like to
+thank these uber-programmers for their great work:
+
+  ElementTree by Frederich Lundh
+  cRat by Christopher A. Craig
+  Rat by Sjoerd Mullender

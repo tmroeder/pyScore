@@ -1,8 +1,8 @@
 """
-Definition of 'Basic GUIDO' ornaments, tremolo tags
+Loads either a C extension or 100% Python rational number module
 Python GUIDO tools
 
-Copyright (C) 2004 Michael Droettboom
+Copyright (C) 2002 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -18,32 +18,9 @@ Copyright (C) 2004 Michael Droettboom
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from pyScore.Guido.objects.core import TAG
-from pyScore.util.rational import Rat
+try:
+    from crat import rational as Rat
+except ImportError:
+    from Rat import Rat
 
-class ORNAMENT:
-    def __init__(self, name, id, args_list, args_dict, *args, **kwargs):
-        TAG.__init__(self, name, id, args_list, args_dict, *args, **kwargs)
-        if len(args_list):
-            self.duration = Rat(1, int(args_list[0]))
-        else:
-            self.duration = Rat(1, 32)
-
-class trill(ORNAMENT, TAG):
-    pass
-tr = trill
-
-class mordent(ORNAMENT, TAG):
-    pass
-mord = mordent
-
-class turn(ORNAMENT, TAG):
-    pass
-
-class tremolo(ORNAMENT, TAG):
-    pass
-trem = tremolo
-
-__all__ = """
-trill tr mordent mord turn tremolo trem
-""".split()
+__all__ = ["Rat"]

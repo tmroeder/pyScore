@@ -19,7 +19,7 @@ Copyright (C) 2004 Michael Droettboom
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 from pyScore.Guido.objects.core import TAG
-from pyScore.util.Rat import Rat
+from pyScore.util.rational import Rat
 
 class grace(TAG):
     def __init__(self, name, id, args_list, args_dict, *args, **kwargs):
