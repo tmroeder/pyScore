@@ -77,4 +77,15 @@ if isfile("tests.txt"):
                 destination=open(join(DIST_DIR, "tests.html"), "w"),
                 writer_name="html")
 
+print "Generating graph..."
+import pyScore.MusicXML.convert
+import pyScore.Guido.convert
+import pyScore.MIDI.convert
+from pyScore.convert import *
+
+graph = ConverterGraph([pyScore.MusicXML.convert,
+                        pyScore.Guido.convert,
+                        pyScore.MIDI.convert])
+graph.make_dot_file(open("pyScore_graph.dot", "w"))
+
 open(join(DIST_DIR, "default.css"), "w").write(open("default.css", "r").read())

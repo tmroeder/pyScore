@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='ascii'?>
+<?xml version='1.0' encoding='us-ascii'?>
 <!-- Created with pyScore 0.1 by Michael Droettboom <http://dkc.jhu.edu/~mdboom/pyScore> -->
 <!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 1.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise><work /><identification /><part-list><score-part id="P1"><part-name>Music</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>144</divisions></attributes><note><pitch><step>C</step><alter>0</alter><octave>4</octave></pitch><duration>144</duration><type>quarter</type><notations><articulations><staccato /></articulations></notations></note><note><pitch><step>C</step><alter>0</alter><octave>4</octave></pitch><duration>144</duration><type>quarter</type><notations><articulations><tenuto /></articulations></notations></note><note><pitch><step>C</step><alter>0</alter><octave>4</octave></pitch><duration>144</duration><type>quarter</type><notations><articulations><accent /></articulations></notations></note></measure></part></score-partwise>

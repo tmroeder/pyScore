@@ -14,17 +14,26 @@ This software is released under the GNU General Public License (GPL).
 Features
 ========
 
-Currently, the only features are:
+The current features are:
 
 - Guido_ normalization
 - Extracting absolute times for Guido_ events
 - Guido_ to MusicXML_ conversion
 - MusicXML_ to Guido_ conversion
+- MusicXML_ to MidiXML_ to MIDI_ conversion (at the moment this is
+  very "literal")
 - Obtaining rendered music images from the Guido_ Noteserver_.
 
 .. _Guido: http://www.salieri.org/guido/
 .. _Noteserver: http://www.noteserver.org/
 .. _MusicXML: http://www.musicxml.com/
+.. _MidiXML: http://www.recordare.com/dtds/midixml.html
+.. _MIDI: http://www.midi.org/
+
+The various conversions are illustrated in the following graph.  Each
+arrow represents a direct conversion.
+
+.. image:: pyScore_graph.png
 
 Download
 ========
@@ -60,45 +69,6 @@ pretty-printing it yet.
 Installation
 ============
 
-Prerequisites
--------------
-
-You'll need a copy of `libxml2/libxslt`__ with Python bindings
-installed.
-
-.. __: http://www.libxml.org
-
-Microsoft Windows
-`````````````````
-
-Stéphane Bidoul maintains installers of the `libxml2/libxslt Python
-bindings`__.  That's by far the easiest way to get this going on
-Windows.
-
-.. __: http://users.skynet.be/sbi/libxml-python/
-
-Linux
-`````
-
-To see if the libxml2/libxslt Python bindings are already installed,
-open a Python interpreter and type::
-
-  import libxml
-
-If you don't receive an error, you're good to go.
-
-If not, there's a good chance your distribution provides a binary package.
-For instance, on Fedora Core 1.0, the package is named
-``libxml2-python``.  Try installing it using your
-distribution-specific package installation tool (RPM, dpkg etc.)
-
-If that fails, you'll have to build it from source.
-
-Mac OS-X
-````````
-
-Coming soon...
-
 Building and installing from source
 -----------------------------------
 
@@ -131,7 +101,7 @@ This package includes local copies of other third-party packages, so
 that it can be installed on a vanilla Python system.  I'd like to
 thank these Ã¼ber-programmers for their great work:
 
-- MusicXML `DTDs and XSLTs`__ by Michael Good
+- MusicXML and MidiXML `DTDs and XSLTs`__ by Michael Good
 
 .. __: http://www.musicxml.com/
 
@@ -146,3 +116,8 @@ thank these Ã¼ber-programmers for their great work:
 -  Rat__ by Sjoerd Mullender
 
 .. __: http://cvs.sourceforge.net/viewcvs.py/python/python/dist/src/Demo/classes/Rat.py
+
+- `Python MIDI Package`__ by Max M (I don't really use the package, I just
+  copied and pasted the constants.  Max M deserves credit, however.)
+
+.. __: http://www.mxm.dk/products/public/pythonmidi

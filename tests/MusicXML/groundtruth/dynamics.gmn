@@ -1,8 +1,7 @@
 % Created with pyScore 0.1 by Michael Droettboom <http://dkc.jhu.edu/~mdboom/pyScore>
 {[\intens<"mf"> c1/4 d e f |
  \intens<"ff">( c d e f g |
- \crescendoBegin:1 ) c d e f g \crescendoEnd:1 \diminuendoBegin:1 |
- g f e d c \diminuendoEnd:1 \crescendoBegin:1 |
- c d e \crescendoEnd:1 \diminuendoBegin:1 e d c \diminuendoEnd:1 |
- |
+ \crescBegin:1 ) c d e f g \crescEnd:1 |
+ \dimBegin:1 g f e d c \dimEnd:1 |
+ \crescBegin:1 c d e \crescEnd:1 \dimBegin:1 e d c \dimEnd:1 |
 ]}

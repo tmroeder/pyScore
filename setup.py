@@ -51,12 +51,13 @@ scripts = [x for x in glob(join("scripts", "*"))
 # Data
 
 lib_path = get_python_lib()[len(PREFIX)+1:]
-data_dirs = ["pyScore.MusicXML.DTD", "pyScore.MusicXML.XSLT"]
+data_dirs = ["pyScore.MusicXML.DTD", "pyScore.MusicXML.XSLT", "pyScore.MIDI.DTD"]
 data_files = []
 for dir in data_dirs:
    dir = join(*dir.split("."))
    files = glob(join(dir, "*.*"))
    data_files.append((join(lib_path, dir), files))
+data_files.append((join(lib_path, "pyScore"), [join("pyScore", "pyScore.cfg")]))
 
 ########################################
 # Extensions

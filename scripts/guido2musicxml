@@ -7,13 +7,7 @@ import pyScore.MusicXML.convert
 
 import sys
 
-def callback(options, input_file, output_file):
-   if options.dtd:
-      validate(output_file)
-
 convert(
    [pyScore.Guido.convert, pyScore.MusicXML.convert],
-   Format("Guido", "gmn", "guido_file"),
-   Format("MusicXML", "xml", "musicxml_file"),
-   extra_args=[(("-d", "--dtd"), {'action': 'store_true', 'dest': 'dtd', 'help': 'Validate against the MusicXML DTD'})],
-   callback=callback)
+   Format("Guido", "gmn", "Guido_file"),
+   Format("MusicXML", "xml", "MusicXML_file"))

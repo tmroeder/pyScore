@@ -9,6 +9,6 @@ import sys
 
 convert(
    [pyScore.Guido.convert, pyScore.MusicXML.convert],
-   Format("Guido", "gmn", "guido_file"),
-   Format("Guido", "new.gmn", "guido_file"))
+   Format("Guido", "gmn", "Guido_file"),
+   Format("Guido", "new.gmn", "Guido_file"))
 

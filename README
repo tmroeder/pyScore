@@ -14,24 +14,33 @@ This software is released under the GNU General Public License (GPL).
 Features
 ========
 
-Currently, the only features are:
+The current features are:
 
 - Guido_ normalization
 - Extracting absolute times for Guido_ events
 - Guido_ to MusicXML_ conversion
 - MusicXML_ to Guido_ conversion
+- MusicXML_ to MidiXML_ to MIDI_ conversion (at the moment this is
+  very "literal")
 - Obtaining rendered music images from the Guido_ Noteserver_.
 
 .. _Guido: http://www.salieri.org/guido/
 .. _Noteserver: http://www.noteserver.org/
 .. _MusicXML: http://www.musicxml.com/
+.. _MidiXML: http://www.recordare.com/dtds/midixml.html
+.. _MIDI: http://www.midi.org/
+
+The various conversions are illustrated in the following graph.  Each
+arrow represents a direct conversion.
+
+.. image:: pyScore_graph.png
 
 Download
 ========
 
-- `pyScore-0.1.tar.bz2 <pyScore-0.1.tar.bz2>`_ (145606 bytes)
-- `pyScore-0.1.tar.gz <pyScore-0.1.tar.gz>`_ (181431 bytes)
-- `pyScore-0.1.zip <pyScore-0.1.zip>`_ (271435 bytes)
+- `pyScore-0.1.tar.bz2 <pyScore-0.1.tar.bz2>`_ (137231 bytes)
+- `pyScore-0.1.tar.gz <pyScore-0.1.tar.gz>`_ (168066 bytes)
+- `pyScore-0.1.zip <pyScore-0.1.zip>`_ (266194 bytes)
 
 
 You can also `browse the CVS`__.
@@ -50,6 +59,8 @@ Notes
 
 - arguments to Guido beams are ignored [beam_stem.py]
 
+- Only type 1 MIDI files are supported at this time [midixml_to_midi.py]
+
 - MusicXML doesn't seem to have a way to support Guido \\headsReverse [guido_to_musicxml.py]
 
 - Guido \\noteFormat tag is completely unsupported [guido_to_musicxml.py]
@@ -58,25 +69,21 @@ Notes
 
 - In GUIDO, barlines are "global": i.e. they affect all parts.  Therefore, we merge all barlines, but warn if there are barlines in subsequent parts that do not match those in the previous parts. [guido_to_musicxml.py]
 
-- Cross-staff beaming doesn't seem to work [guido_to_musicxml.py]
+- Cross-staff beaming doesn't seem to convert from Guido to MusicXML [guido_to_musicxml.py]
 
 - Guido doesn't have named parts like MusicXML, so we grab it from the \\instrument tag [guido_to_musicxml.py]
 
-- Measures out-of-order in Guido are ignored [guido_to_musicxml.py]
-
-- trills, turns and mordents are much less specific in MusicXML than in GUIDO, so pitch name (but not the accidental) of auxiliary notes are thrown out, as well as any duration for the ornament [guido_to_musicxml.py]
-
-- Slurs are not converted from MusicXML to Guido, since slurs can start in one voice and end in another.  (This is not supported by Guido). [musicxml_to_guido.py]
+- Measures out-of-order (using arguments to the \\beam tag) in Guido are treated as in-order [guido_to_musicxml.py]
 
 - Only the first verse of lyrics in MusicXML can be stored in Guido [musicxml_to_guido.py]
 
-- There is no way to represent <senza-misura> and type="single-number" [musicxml_to_guido.py]
+- There is no way to represent <senza-misura> and type="single-number" for meters in Guido [musicxml_to_guido.py]
 
 - Tempo names are not converted from MusicXML -> Guido, only metronome markings [musicxml_to_guido.py]
 
-- There is a limited vocabulary of written directions that get converted from [musicxml_to_guido.py]
+- There is a limited vocabulary of written directions that get converted from MusicXML to Guido.  This conversion is not very smart or robust. [musicxml_to_guido.py]
 
-- Markings followed by dashes is not supported by MusicXML -> Guido [musicxml_to_guido.py]
+- Markings followed by dashes are not supported by MusicXML -> Guido [musicxml_to_guido.py]
 
 Bugs or shortcomings in other systems
 -------------------------------------
@@ -108,6 +115,12 @@ To-dos
 
 - add support for incremental parsing [ElementTree.py]
 
+- Midi XML -> MIDI could be done more efficiently (perhaps) with a SAX-like parser [midixml_to_midi.py]
+
+- Make MIDI tempo track [musicxml_to_midixml.py]
+
+- check that we have ``xmllint`` and use it [validate.py]
+
 - document GuidoToMusicXML.make_plan because it's really hairy [guido_to_musicxml.py]
 
 - support word-based (as opposed to wedge-based) *cresc.* and *dim.* [guido_to_musicxml.py]
@@ -120,6 +133,8 @@ To-dos
 
 Longer-term plans
 -----------------
+
+- Possibly switch to another XML toolkit to support transformation and validation directly from Python [validate.py]
 
 - Finish support for conversion from MusicXML to Guido [musicxml_to_guido.py]
 
@@ -144,45 +159,6 @@ pretty-printing it yet.
 
 Installation
 ============
-
-Prerequisites
--------------
-
-You'll need a copy of `libxml2/libxslt`__ with Python bindings
-installed.
-
-.. __: http://www.libxml.org
-
-Microsoft Windows
-`````````````````
-
-Stéphane Bidoul maintains installers of the `libxml2/libxslt Python
-bindings`__.  That's by far the easiest way to get this going on
-Windows.
-
-.. __: http://users.skynet.be/sbi/libxml-python/
-
-Linux
-`````
-
-To see if the libxml2/libxslt Python bindings are already installed,
-open a Python interpreter and type::
-
-  import libxml
-
-If you don't receive an error, you're good to go.
-
-If not, there's a good chance your distribution provides a binary package.
-For instance, on Fedora Core 1.0, the package is named
-``libxml2-python``.  Try installing it using your
-distribution-specific package installation tool (RPM, dpkg etc.)
-
-If that fails, you'll have to build it from source.
-
-Mac OS-X
-````````
-
-Coming soon...
 
 Building and installing from source
 -----------------------------------
@@ -216,7 +192,7 @@ This package includes local copies of other third-party packages, so
 that it can be installed on a vanilla Python system.  I'd like to
 thank these Ã¼ber-programmers for their great work:
 
-- MusicXML `DTDs and XSLTs`__ by Michael Good
+- MusicXML and MidiXML `DTDs and XSLTs`__ by Michael Good
 
 .. __: http://www.musicxml.com/
 
@@ -231,3 +207,8 @@ thank these Ã¼ber-programmers for their great work:
 -  Rat__ by Sjoerd Mullender
 
 .. __: http://cvs.sourceforge.net/viewcvs.py/python/python/dist/src/Demo/classes/Rat.py
+
+- `Python MIDI Package`__ by Max M (I don't really use the package, I just
+  copied and pasted the constants.  Max M deserves credit, however.)
+
+.. __: http://www.mxm.dk/products/public/pythonmidi

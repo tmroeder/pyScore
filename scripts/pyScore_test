@@ -4,26 +4,39 @@ from pyScore.util.script_helpers import *
 from pyScore.MusicXML.validate import validate
 import pyScore.MusicXML.convert
 import pyScore.Guido.convert
+import pyScore.MIDI.convert
 
 from os.path import isdir
 
 TEST_DIRECTORY = "tests"
 tests = [
-   ("Guido", Format("Guido", "gmn", "guido_file"),
-    Format("Guido", "gmn", "guido_file"),
+   ("Guido", Format("Guido", "gmn", "Guido_file"),
+    Format("Guido", "gmn", "Guido_file"),
     "Guido -> Guido",
     "This test exercises the Guido parser and grammar.  (MusicXML is uninvolved).  Some 'canonicalization' of the data is expected."),
-   ("Guido", Format("Guido", "gmn", "guido_file"),
-    Format("MusicXML", "xml", "musicxml_file"),
+   ("Guido", Format("Guido", "gmn", "Guido_file"),
+    Format("MusicXML", "xml", "MusicXML_file"),
     "Guido -> MusicXML",
     "Converting all Guido Basic spec and some Guido Advanced spec to MusicXML."
    ),
    ("MusicXML",
-    Format("MusicXML", "xml", "musicxml_file"),
-    Format("Guido", "gmn", "guido_file"),
+    Format("MusicXML", "xml", "MusicXML_file"),
+    Format("Guido", "gmn", "Guido_file"),
     "MusicXML -> Guido",
     "Preliminary support for converting MusicXML to Guido."
-   )
+   ),
+   ("MusicXML",
+    Format("MusicXML", "xml", "MusicXML_file"),
+    Format("MidiXML", "xml", "MidiXML_file"),
+    "MusicXML -> MidiXML",
+    "Preliminary support for converting MusicXML to MidiXML."
+    ),
+   ("MusicXML",
+    Format("MusicXML", "xml", "MusicXML_file"),
+    Format("MIDI", "mid", "MIDI_file"),
+    "MusicXML -> MIDI",
+    "Preliminary support for converting MusicXML to MIDI."
+    )
    ]
 
 def callback(input_file, output_file):
@@ -31,5 +44,5 @@ def callback(input_file, output_file):
 ##       validate(output_file)
    pass
 
-test([pyScore.Guido.convert, pyScore.MusicXML.convert],
+test([pyScore.Guido.convert, pyScore.MusicXML.convert, pyScore.MIDI.convert],
      TEST_DIRECTORY, tests, groundtruth=True, callback=callback)
