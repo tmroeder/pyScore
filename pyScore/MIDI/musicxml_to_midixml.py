@@ -181,7 +181,7 @@ class MusicXMLToMidiXML:
    ########################################
    # Concrete elements
 
-   element_attributes = element_direction = element_recurse
+   element_attributes = element_direction = element_direction_type = element_recurse
    element_score_instrument = element_recurse
 
    class MetaText:
@@ -195,6 +195,8 @@ class MusicXMLToMidiXML:
 
    element_rights = MetaText("CopyrightNotice")
    element_work_title = MetaText("TextEvent")
+   element_words = MetaText("TextEvent")
+   element_rehearsal = MetaText("Marker")
 
    def element_creator(self, input, time_spine, events, meta_events, state):
       output = Element("TextEvent")
@@ -258,7 +260,7 @@ class MusicXMLToMidiXML:
                             Velocity = "0")
          events.append(
             make_event(note_off,
-                       int(time_spine + (self.convert_duration(duration, state.divisions) * 0.99)),
+                       int(time_spine + max(0, self.convert_duration(duration, state.divisions) - 1)),
                        state.ticks_per_beat))
 
    def element_lyric(self, lyric, time_spine, events, meta_events, state):

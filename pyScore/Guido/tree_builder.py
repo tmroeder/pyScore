@@ -310,7 +310,7 @@ class GuidoTreeBuilder:
             tag_cls = self._registered_tags[name]
          else:
             tag_cls = self._registered_tags['DEFAULT_TAG']
-            self.unknown_tags[tag['name']] = None
+            self.unknown_tags[name] = None
       tag = tag_cls(name, id, args_list, args_dict, pos=pos)
       tag.mode = mode
       tag.use_parens = use_parens

@@ -55,11 +55,9 @@ class ConfigOptionParser(OptionParser):
             for key, val in config_parser.items(section):
                if self.has_option("--" + key):
                   option = self.get_option("--" + key)
-                  if option.help.startswith("[%s]" % section) and getattr(options, option.dest) == None:
-                     try:
-                        setattr(options, option.dest, eval(val))
-                     except:
-                        print "WARNING: Error in config file at %s/%s" % (section, key)
+                  if (option.help.startswith("[%s]" % section) and
+                      getattr(options, option.dest) == None):
+                     option.process("", val, self.values, self)
          self._cache = (options, args)
       return self._cache
 

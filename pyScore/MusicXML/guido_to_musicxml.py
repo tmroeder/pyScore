@@ -129,7 +129,7 @@ the Guido stream, such as stem direction..."""
          if len(barline_warnings):
             sys.stderr.write(
                "WARNING: In part %d, barlines do not line up with previous parts at %s" %
-               (part_no, ", ".join([str(x) for x in barline_warnings])))
+               (i, ", ".join([str(x) for x in barline_warnings])))
 
       staff_layout = Grouper()
       staves_to_sequences = {}
@@ -248,6 +248,8 @@ the Guido stream, such as stem direction..."""
    # <note> elements ########################################
 
    def make_note(self, item, measure, state, chord=False):
+      if item.get_duration() == 0:
+         return
       note = SubElement(measure, "note")
       ties = []
       if len(item.get_tag("grace")):
@@ -343,7 +345,7 @@ the Guido stream, such as stem direction..."""
       float_dur = float(item.num) / float(item.den)
       if float_dur > 2.0 or float_dur < 0.00390625: # 1/256
          if self._warnings:
-            print "Duration '%s' is out of range for MusicXML" % dur
+            print "Duration '%s' is out of range for MusicXML" % float_dur
          return None, None
       dur = Rat(item.num, item.den)
       for (length, name) in g2m_duration_type:
@@ -352,7 +354,7 @@ the Guido stream, such as stem direction..."""
       item.raise_error("Error determining look of note.")
 
    def make_time_modification(self, length, name, item, note, state):
-      if length.num != item.num or length.den != item.den:
+      if length != None and (length.num != item.num or length.den != item.den):
          dur = Rat(item.num, item.den)
          tuplet = length / dur
          time_modification = SubElement(note, "time-modification")
@@ -371,6 +373,7 @@ the Guido stream, such as stem direction..."""
 
       # EXT: secondary beaming doesn't seem to work in Turandot
       for beam in item.get_tag("beam"):
+
          if beam.is_first(item):
             number = state.active_beams[item.parent.voice].begin(beam, "beams")
             type = "begin"
