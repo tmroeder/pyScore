@@ -31,16 +31,18 @@ The current features are:
 .. _MIDI: http://www.midi.org/
 
 The various conversions are illustrated in the following graph.  Each
-arrow represents a direct conversion.
+arrow represents a direct conversion.  The dashed arrows indicate that
+the conversion is somehow lossy.  The bluish nodes represent
+on-disk files.  Everything else is an in-memory data structure.
 
 .. image:: pyScore_graph.png
 
 Download
 ========
 
-- `pyScore-0.1.tar.bz2 <pyScore-0.1.tar.bz2>`_ (137231 bytes)
-- `pyScore-0.1.tar.gz <pyScore-0.1.tar.gz>`_ (168066 bytes)
-- `pyScore-0.1.zip <pyScore-0.1.zip>`_ (266194 bytes)
+- `pyScore-0.1.tar.bz2 <pyScore-0.1.tar.bz2>`_ (137551 bytes)
+- `pyScore-0.1.tar.gz <pyScore-0.1.tar.gz>`_ (168512 bytes)
+- `pyScore-0.1.zip <pyScore-0.1.zip>`_ (266649 bytes)
 
 
 You can also `browse the CVS`__.

@@ -82,9 +82,17 @@ class ConverterGraph:
 
    def make_dot_file(self, file):
       file.write("digraph g {\n")
+      nodes = {}
+      for input in self.inputs.keys():
+         nodes[input] = None
+      for output in self.outputs:
+         nodes[output] = None
+      for node in nodes:
+         if node.endswith("file"):
+            file.write('"%s" [style=filled, fillcolor=LightBlue];\n' % node.replace("_", " "))
       for input, val in self.inputs.items():
          for output in val.keys():
-            file.write('"%s" -> "%s"\n' % (input.replace("_", " "), output.replace("_", " ")))
+            file.write('"%s" -> "%s";\n' % (input.replace("_", " "), output.replace("_", " ")))
       file.write("}\n")
 
 def convert(input_format, output_format, input, stream=sys.stdout, progress_callback=dummy_function, **kwargs):

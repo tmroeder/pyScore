@@ -1,5 +1,5 @@
 % Created with pyScore 0.1 by Michael Droettboom <http://dkc.jhu.edu/~mdboom/pyScore>
-{[\staff<1> \title<"BWV 6.6"> \composer<"J. S. Bach"> \key<-2> \clef<"treble"> \meter<"C"> \stemsUp \beamBegin:1 g1/8 a \beamEnd:1 |
+{[\staff<1> \title<"BWV 6.6"> \composer<"J. S. Bach"> \key<-2> \clef<"treble"> \meter<"C"> \beamBegin:1 \stemsUp g1/8 a \beamEnd:1 |
  b&/4 \beamBegin:1 a/8 g \beamEnd:1 f#/4 \beamBegin:1 g/8 a \beamEnd:1 |
  b&/4 a \fermata( g ) |
 ],
@@ -7,7 +7,7 @@
  \beamBegin:1 g/8 f \beamEnd:1 e&/4 d \beamBegin:1 d/8 f# \beamEnd:1 |
  g/4 f# \fermata( d ) |
 ],
-[\staff<2> \key<-2> \clef<"bass"> \meter<"C"> \stemsUp \beamBegin:1 b&0/8 c1 \beamEnd:1 |
+[\staff<2> \key<-2> \clef<"bass"> \meter<"C"> \beamBegin:1 \stemsUp b&0/8 c1 \beamEnd:1 |
  d/4 \beamBegin:1 c/8 b&0 \beamEnd:1 a/4 \beamBegin:1 b&/8 c1 \beamEnd:1 |
  \beamBegin:1 d e& \beamEnd:1 \beamBegin:1 a0 d1 \beamEnd:1 \fermata( b&0/4 ) |
 ],

@@ -21,6 +21,7 @@ Copyright (C) 2004 Michael Droettboom
 # PLAN: Finish support for conversion from MusicXML to Guido
 
 from pyScore.config import config
+from pyScore.elementtree.ElementTree import iselement, tostring
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic import all as basic
 from pyScore.Guido.objects.advanced import all as advanced
@@ -29,13 +30,14 @@ from pyScore.MusicXML.conversion_constants import *
 from pyScore.util.structures import *
 from pyScore.util.rational import Rat
 
-from pyScore.elementtree.ElementTree import iselement, tostring
-
 class MusicXMLToGuido:
    def __init__(self, tags):
       self._tags = tags
       self._warnings = config.get("warnings")
       self._verbose = config.get("verbose")
+
+   ########################################
+   # Utility methods
 
    def m2g_duration(self, duration, divisions):
       return Rat(1, 4) * Rat(1, divisions) * Rat(duration, 1)
@@ -50,80 +52,6 @@ class MusicXMLToGuido:
          self.lyrics = None
          self.voice = 1
 
-   def convert(self, tree):
-      # TODO: deal with time-wise MusicXML scores (e.g. use Michael Good's XSLT transform first)
-      assert iselement(tree)
-      builder = GuidoTreeBuilder(self._tags)
-      state = self.State()
-      self.make_sequences(tree, builder, state)
-      return builder.score
-
-   # generic conversion functions ########################################
-
-   def begin_range(self, element_name, tag_name, element, builder, state):
-      """Creates the Begin tag for things that have overlapping ranges.
-      * element_name: the XPath to the MusicXML element in element
-      * tag_name: the Guido tag name
-      """
-      for e in element.findall(element_name):
-         if e.get("type") == "start":
-            number = e.get("number", "1")
-            builder.add_Tag(tag_name + "Begin", int(number), ())
-
-   def end_range(self, element_name, tag_name, element, builder, state):
-      """Creates the End tag for things that have overlapping ranges.
-      * element_name: the XPath to the MusicXML element in element
-      * tag_name: the Guido tag name
-      """
-      for e in element.findall(element_name):
-         if e.get("type") == "stop":
-            number = e.get("number", "1")
-            builder.add_Tag(tag_name + "End", int(number), ())
-
-   def begin_notation(self, category_elements, options, callback, builder, state):
-      """Creates the Begin tag for non-overlapping notations
-      * options: The elements that cause this behavior
-      * callback: Given a MusicXML element, create a Guido Tag
-      """
-      for category_element in category_elements:
-         for option in options:
-            if not state.notations.has_key(option):
-               element = category_element.find("./" + option)
-               if element != None:
-                  callback(option, builder)
-                  state.notations[option] = None
-
-   def end_notation(self, category_elements, options, callback, builder, state):
-      """Creates the Begin tag for non-overlapping notations
-      * options: The elements that cause this behavior
-      * callback: Given a MusicXML element and builder, adds a Guido tag
-      """
-      if category_elements == []:
-         for option in options:
-            if state.notations.has_key(option):
-               callback(option, builder)
-               del state.notations[option]
-      else:
-         for option in options:
-            if state.notations.has_key(option):
-               remove = True
-               for category_element in category_elements:
-                  element = category_element.find("./" + option)
-                  if element != None:
-                     remove = False
-                     break
-               if remove:
-                  callback(option, builder)
-                  del state.notations[option]
-
-   def single_notation(self, element, path, callback, builder, state):
-      """Creates tags containing only one note.
-      * path: Path from element to desired element
-      * callback: Given the element and builder, adds the Guido tag"""
-      element = element.find(path)
-      if element != None:
-         callback(element, builder)
-
    def dispatch_element(self, element, builder, state):
       """Given a MusicXML element <x>, dispatches a call to a method named element_x"""
       func_name = "element_%s" % element.tag.replace("-", "_")
@@ -131,7 +59,16 @@ class MusicXMLToGuido:
          return getattr(self, func_name)(element, builder, state)
       return None
 
-   # Concrete processing ########################################
+   ########################################
+   # Toplevel methods
+
+   def convert(self, tree):
+      # TODO: deal with time-wise MusicXML scores (e.g. use Michael Good's XSLT transform first)
+      assert iselement(tree)
+      builder = GuidoTreeBuilder(self._tags)
+      state = self.State()
+      self.make_sequences(tree, builder, state)
+      return builder.score
 
    def make_sequences(self, tree, builder, state):
       builder.begin_Segment()
@@ -207,7 +144,75 @@ class MusicXMLToGuido:
          time_spine += element.guido_duration
       builder.add_Barline()
 
-   # element dispatch targets ########################################
+   ########################################
+   # generic conversion methods
+
+   def begin_range(self, element_name, tag_name, element, builder, state):
+      """Creates the Begin tag for things that have overlapping ranges.
+      * element_name: the XPath to the MusicXML element in element
+      * tag_name: the Guido tag name
+      """
+      for e in element.findall(element_name):
+         if e.get("type") == "start":
+            number = e.get("number", "1")
+            builder.add_Tag(tag_name + "Begin", int(number), ())
+
+   def end_range(self, element_name, tag_name, element, builder, state):
+      """Creates the End tag for things that have overlapping ranges.
+      * element_name: the XPath to the MusicXML element in element
+      * tag_name: the Guido tag name
+      """
+      for e in element.findall(element_name):
+         if e.get("type") == "stop":
+            number = e.get("number", "1")
+            builder.add_Tag(tag_name + "End", int(number), ())
+
+   def begin_notation(self, category_elements, options, callback, builder, state):
+      """Creates the Begin tag for non-overlapping notations
+      * options: The elements that cause this behavior
+      * callback: Given a MusicXML element, create a Guido Tag
+      """
+      for category_element in category_elements:
+         for option in options:
+            if not state.notations.has_key(option):
+               element = category_element.find("./" + option)
+               if element != None:
+                  callback(option, builder)
+                  state.notations[option] = None
+
+   def end_notation(self, category_elements, options, callback, builder, state):
+      """Creates the Begin tag for non-overlapping notations
+      * options: The elements that cause this behavior
+      * callback: Given a MusicXML element and builder, adds a Guido tag
+      """
+      if category_elements == []:
+         for option in options:
+            if state.notations.has_key(option):
+               callback(option, builder)
+               del state.notations[option]
+      else:
+         for option in options:
+            if state.notations.has_key(option):
+               remove = True
+               for category_element in category_elements:
+                  element = category_element.find("./" + option)
+                  if element != None:
+                     remove = False
+                     break
+               if remove:
+                  callback(option, builder)
+                  del state.notations[option]
+
+   def single_notation(self, element, path, callback, builder, state):
+      """Creates tags containing only one note.
+      * path: Path from element to desired element
+      * callback: Given the element and builder, adds the Guido tag"""
+      element = element.find(path)
+      if element != None:
+         callback(element, builder)
+
+   ########################################
+   # Concrete elements
 
    def element_note(self, element, builder, state):
       chord = element.find("./chord") != None

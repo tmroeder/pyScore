@@ -10,8 +10,10 @@ recursive-include tests/MusicXML/groundtruth *.gmn *.xml
 
 recursive-include profile/Guido/input *.gmn
 
+recursive-include pyScore *.cfg
 recursive-include pyScore/MusicXML/DTD *.dtd *.pen
 recursive-include pyScore/MusicXML/XSLT *.xsl
+recursive-include pyScore/MIDI/DTD *.dtd
 
 include scripts/guido2musicxml scripts/musicxml2guido scripts/guido2guido scripts/pyScore_test scripts/pyScore_profile
 

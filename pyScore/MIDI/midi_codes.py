@@ -18,6 +18,8 @@ Copyright (C) 2004 Michael Droettboom
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import re
+
 def bin_number(num, length):
     # MIDI uses big-endian for everything
     num = int(num)
@@ -50,12 +52,16 @@ def bin_var_number(x):
 delta_time = bin_var_number
 
 def hex_dump(s):
-    return ' '.join([hex(ord(x))[2:] for x in s])
+   return ' '.join([hex(ord(x))[2:] for x in s])
+
+_remove_whitespace = re.compile("\s")
+def decode_hex(s):
+   return _remove_whitespace.sub("", s).decode("hex")
 
 ###################################################
 ## Definitions of the different midi events
 
-TRACK_END = bin_number(0x00ff2f00, 4)
+TRACK_END = delta_time(0) + bin_number(0xff2f00, 3)
 HEADER_LENGTH = bin_number(6, 4)
 ZERO = bin_var_number(0)
 
@@ -92,41 +98,41 @@ PITCH_BEND = 0xE0
 
 # High resolution continuous controllers (MSB)
 
-BANK_SELECT = 0x00
-MODULATION_WHEEL = 0x01
-BREATH_CONTROLLER = 0x02
-FOOT_CONTROLLER = 0x04
-PORTAMENTO_TIME = 0x05
-DATA_ENTRY = 0x06
-CHANNEL_VOLUME = 0x07
-BALANCE = 0x08
-PAN = 0x0A
-EXPRESSION_CONTROLLER = 0x0B
-EFFECT_CONTROL_1 = 0x0C
-EFFECT_CONTROL_2 = 0x0D
-GEN_PURPOSE_CONTROLLER_1 = 0x10
-GEN_PURPOSE_CONTROLLER_2 = 0x11
-GEN_PURPOSE_CONTROLLER_3 = 0x12
-GEN_PURPOSE_CONTROLLER_4 = 0x13
+BANK_SELECT_MSB = 0x00
+MODULATION_WHEEL_MSB = 0x01
+BREATH_CONTROLLER_MSB = 0x02
+FOOT_CONTROLLER_MSB = 0x04
+PORTAMENTO_TIME_MSB = 0x05
+DATA_ENTRY_MSB = 0x06
+CHANNEL_VOLUME_MSB = 0x07
+BALANCE_MSB = 0x08
+PAN_MSB = 0x0A
+EXPRESSION_CONTROLLER_MSB = 0x0B
+EFFECT_CONTROL_1_MSB = 0x0C
+EFFECT_CONTROL_2_MSB = 0x0D
+GEN_PURPOSE_CONTROLLER_1_MSB = 0x10
+GEN_PURPOSE_CONTROLLER_2_MSB = 0x11
+GEN_PURPOSE_CONTROLLER_3_MSB = 0x12
+GEN_PURPOSE_CONTROLLER_4_MSB = 0x13
 
 # High resolution continuous controllers (LSB)
 
-BANK_SELECT = 0x20
-MODULATION_WHEEL = 0x21
-BREATH_CONTROLLER = 0x22
-FOOT_CONTROLLER = 0x24
-PORTAMENTO_TIME = 0x25
-DATA_ENTRY = 0x26
-CHANNEL_VOLUME = 0x27
-BALANCE = 0x28
-PAN = 0x2A
-EXPRESSION_CONTROLLER = 0x2B
-EFFECT_CONTROL_1 = 0x2C
-EFFECT_CONTROL_2 = 0x2D
-GENERAL_PURPOSE_CONTROLLER_1 = 0x30
-GENERAL_PURPOSE_CONTROLLER_2 = 0x31
-GENERAL_PURPOSE_CONTROLLER_3 = 0x32
-GENERAL_PURPOSE_CONTROLLER_4 = 0x33
+BANK_SELECT_LSB = 0x20
+MODULATION_WHEEL_LSB = 0x21
+BREATH_CONTROLLER_LSB = 0x22
+FOOT_CONTROLLER_LSB = 0x24
+PORTAMENTO_TIME_LSB = 0x25
+DATA_ENTRY_LSB = 0x26
+CHANNEL_VOLUME_LSB = 0x27
+BALANCE_LSB = 0x28
+PAN_LSB = 0x2A
+EXPRESSION_CONTROLLER_LSB = 0x2B
+EFFECT_CONTROL_1_LSB = 0x2C
+EFFECT_CONTROL_2_LSB = 0x2D
+GENERAL_PURPOSE_CONTROLLER_1_LSB = 0x30
+GENERAL_PURPOSE_CONTROLLER_2_LSB = 0x31
+GENERAL_PURPOSE_CONTROLLER_3_LSB = 0x32
+GENERAL_PURPOSE_CONTROLLER_4_LSB = 0x33
 
 # Switches
 
@@ -167,6 +173,7 @@ REGISTERED_PARAMETER_NUMBER = 0x65         # (MSB)
 
 # Channel Mode messages - (Detail)
 
+CHANNEL_MODE = 0xB0
 ALL_SOUND_OFF = 0x78
 RESET_ALL_CONTROLLERS = 0x79
 LOCAL_CONTROL_ONOFF = 0x7A
@@ -234,22 +241,19 @@ FILE_HEADER     = 'MThd'
 TRACK_HEADER    = 'MTrk'
 
 ###################################################
-## System Realtime messages
-## I don't supose these are to be found in midi files?!
-
-TIMING_CLOCK   = 0xF8
-# undefined    = 0xF9
-SONG_START     = 0xFA
-SONG_CONTINUE  = 0xFB
-SONG_STOP      = 0xFC
-# undefined    = 0xFD
-ACTIVE_SENSING = 0xFE
-SYSTEM_RESET   = 0xFF
-
-
-###################################################
 ## META EVENT, it is used only in midi files.
 ## In transmitted data it means system reset!!!
 
 META_EVENT     = 0xFF
 # 11111111
+
+VALUE_ON = 0x7F
+VALUE_OFF = 0x00
+
+MAX_4_BIT = 0xf
+MAX_7_BIT = 0x7f
+MAX_8_BIT = 0xff
+MAX_14_BIT = 0x3fff
+MAX_15_BIT = 0x7fff
+MAX_16_BIT = 0xffff
+MAX_24_BIT = 0xffffff

@@ -158,8 +158,8 @@
 <!ATTLIST Port
 	Value		NMTOKEN	#REQUIRED>
 
-<!--
-	An unrecognized meta-event has attributes for both its
+<!--	
+An unrecognized meta-event has attributes for both its
 	event number in hex and its length. The data for the
 	invent is represented in hex within the element, as is
 	done for system exclusives.

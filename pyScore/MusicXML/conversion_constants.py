@@ -20,7 +20,8 @@ Copyright (C) 2002 Michael Droettboom
 
 from pyScore.util.rational import Rat
 
-DIVISIONS = 144
+DIVISIONS = 288
+
 acceptable_dynamic_names = 'p pp ppp pppp ppppp pppppp f ff fff ffff fffff ffffff mp mf sf sfp sfpp fp rf rfz sfz sffz fz'.split()
 g2m_accidental = {
    '&&': 'double-flat',

@@ -31,7 +31,9 @@ The current features are:
 .. _MIDI: http://www.midi.org/
 
 The various conversions are illustrated in the following graph.  Each
-arrow represents a direct conversion.
+arrow represents a direct conversion.  The dashed arrows indicate that
+the conversion is somehow lossy.  The bluish nodes represent
+on-disk files.  Everything else is an in-memory data structure.
 
 .. image:: pyScore_graph.png
 

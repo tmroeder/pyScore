@@ -67,6 +67,9 @@ def MidiXML_tree_to_MIDI_file(tree, filename=None):
    converter = MidiXMLToMidi()
    converter.convert(tree, open(filename, "wb"))
 
-inputs = ["MusicXML_tree", "MidiXML_tree", "MidiXML_file"]
+def MIDI_file_to_MidiXML_tree(tree):
+   raise NotImplementedError()
+
+inputs = ["MusicXML_tree", "MidiXML_tree", "MidiXML_file", "MIDI_file"]
 outputs = ["MidiXML_tree", "MidiXML_file", "MIDI_file", "MIDI_stream"]
 

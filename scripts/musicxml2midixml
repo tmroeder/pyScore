@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+from pyScore.util.script_helpers import *
+from pyScore.MIDI.validate import validate
+import pyScore.MIDI.convert
+import pyScore.MusicXML.convert
+
+import sys
+
+convert(
+   [pyScore.MIDI.convert, pyScore.MusicXML.convert],
+   Format("MusicXML", "xml", "MusicXML_file"),
+   Format("MidiXML", "xml", "MidiXML_file"))

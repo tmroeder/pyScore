@@ -72,27 +72,27 @@ class convert:
          print
 
    def get_options(self, input_format, output_format):
-      pretty_from = "%s (.%s)" % (input_format.name, input_format.ext),
-      pretty_to = "%s (.%s)" % (output_format.name, output_format.ext),
+      pretty_from = "%s (.%s)" % (input_format.name, input_format.ext)
+      pretty_to = "%s (.%s)" % (output_format.name, output_format.ext)
 
       config.usage = "\nConvert from %s to %s\n" % (pretty_from, pretty_to)
-      config.usage += "usage: \%prog [options] input_file"
+      config.usage += "usage: %prog [options] input_file"
       (options, args) = config.parse_args()
 
       if len(args) < 1:
-         parser.error("No input file(s) specified")
+         config.error("No input file(s) specified")
       self.input_files = []
       for arg in args:
          self.input_files.extend(glob(arg))
       if not len(self.input_files):
-         parser.error("Cannot find input file(s) '%s'" % " ".join(args))
+         config.error("Cannot find input file(s) '%s'" % " ".join(args))
       if options.output != "":
          if len(self.input_files) != 1:
-            parser.error("Cannot specify an output file when converting multiple files.")
+            config.error("Cannot specify an output file when converting multiple files.")
          self.output_file = options.output
 
       if options.gzip and options.bzip:
-         parser.error("Can only specify one of --gzip or --bzip2.")
+         config.error("Can only specify one of --gzip or --bzip2.")
       if options.gzip:
          output_format.ext += ".gz"
          if not self.output_file.endswith(".gz"):
@@ -102,7 +102,6 @@ class convert:
          if not self.output_file.endswith(".bz2"):
             self.output_file += ".bz2"
       return options
-
 
 class test:
    def __init__(self, modules, test_dir, tests, groundtruth=False, callback=None):
