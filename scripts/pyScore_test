@@ -5,6 +5,8 @@ from pyScore.MusicXML.validate import validate
 import pyScore.MusicXML.convert
 import pyScore.Guido.convert
 
+from os.path import isdir
+
 TEST_DIRECTORY = "tests"
 tests = [
    ("Guido", Format("Guido", "gmn", "guido_file"),
@@ -12,11 +14,6 @@ tests = [
    ("Guido", Format("Guido", "gmn", "guido_file"),
     Format("MusicXML", "xml", "xml_file")),
 ]
-if exists(sys.argv[-1]):
-   TEST_DIRECTORY = sys.argv[-1]
-if not exists(TEST_DIRECTORY):
-   print "Test directory '%s' can not be found." % TEST_DIRECTORY
-   sys.exit(1)
 
 def callback(input_file, output_file):
 ##    if output_file.endswith("xml"):

@@ -20,7 +20,7 @@ Copyright (C) 2002 Michael Droettboom
 
 # TODO: separate this out into multiple files
 
-from pyScore.elementtree.ElementTree import ElementTree, Element, SubElement, dump
+from pyScore.elementtree.ElementTree import Element, SubElement
 from pyScore.util.structures import *
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic.staff import staff as staff_tag
@@ -28,6 +28,7 @@ from pyScore.Guido.objects.basic.instrument import instrument as instrument_tag
 from pyScore.util.rational import Rat
 
 import sys
+from types import *
 
 DIVISIONS = 144
 acceptable_dynamic_names = 'p pp ppp pppp ppppp pppppp f ff fff ffff fffff ffffff mp mf sf sfp sfpp fp rf rfz sfz sffz fz'.split()
@@ -91,6 +92,7 @@ class GuidoToMusicXML:
       return int((d.num * self._quarter_divisions) / d.den)
    
    def __init__(self, divisions=DIVISIONS, warnings=True, verbose=False):
+      assert type(divisions) == IntType
       self._divisions = DIVISIONS
       self._quarter_divisions = DIVISIONS * 4
       self._warnings = warnings
@@ -223,7 +225,7 @@ class GuidoToMusicXML:
          if isinstance(item, core.TAG):
             if direction == None:
                direction = SubElement(measure, "direction")
-            self.tag_dispatch(item, measure, direction, state)
+            self.dispatch_tag(item, measure, direction, state)
             if not len(direction):
                measure.remove(direction)
                direction = None
@@ -497,7 +499,7 @@ class GuidoToMusicXML:
 
    # TAGS ########################################
 
-   def tag_dispatch(self, tag_obj, measure, direction, state):
+   def dispatch_tag(self, tag_obj, measure, direction, state):
       func_name = "tag_%s%s" % (tag_obj.__class__.__name__, tag_obj.mode)
       if hasattr(self, func_name):
          return getattr(self, func_name)(tag_obj, measure, direction, state)

@@ -27,7 +27,7 @@ try:
    import textwrap
 except ImportError:
    from pyScore.util.backport import textwrap
-from os.path import splitext, split, join, exists
+from os.path import splitext, split, join, exists, isdir, isfile
 import os
 import sys
 
@@ -99,22 +99,32 @@ def convert(modules, input_format, output_format,
          callback(options, filename, output)
 
 def test(modules, test_dir, tests, groundtruth=False, callback=None):
+   if len(sys.argv) > 1:
+      if isdir(sys.argv[-1]):
+         test_dir = sys.argv[-1]
+   if not isdir(test_dir):
+      print "Test directory '%s' can not be found." % TEST_DIRECTORY
+      sys.exit(1)
+
    from pyScore.convert import ConverterGraph
    converter = ConverterGraph(modules)
    groundtruth_warnings = []
    for dir, input_format, output_format in tests:
       root_dir = join(test_dir, dir)
-      if not exists(root_dir):
+      if not isdir(root_dir):
          raise IOError("No test directory '%s'" % root_dir)
       input_dir = join(root_dir, "input")
-      if not exists(input_dir):
+      if not isdir(input_dir):
          raise IOError("No test input directory '%s'" % test_root)
       output_dir = join(root_dir, "output")
       if not exists(output_dir):
          os.mkdir(output_dir)
-      gt_dir = join(root_dir, "groundtruth")
-      if not exists(gt_dir) and groundtruth:
-         raise IOError("No test groundtruth directory '%s'" % test_root)
+      if not isdir(output_dir):
+         raise IOError("No test output directory '%s'" % output_dir)
+      if groundtruth:
+         gt_dir = join(root_dir, "groundtruth")
+         if not isdir(gt_dir):
+            raise IOError("No test groundtruth directory '%s'" % test_root)
       assert isinstance(input_format, Format)
       assert isinstance(output_format, Format)
       steps = converter.get_steps(input_format.converter, output_format.converter)
@@ -128,7 +138,7 @@ def test(modules, test_dir, tests, groundtruth=False, callback=None):
             callback(filename, out_file)
          if groundtruth:
             gt_file = join(gt_dir, root_filename + "." + output_format.ext)
-            if exists(gt_file):
+            if isfile(gt_file):
                test_list = open(out_file, "rU").readlines()
                gt_list = open(gt_file, "rU").readlines()
                for a, b in zip(test_list, gt_list):
