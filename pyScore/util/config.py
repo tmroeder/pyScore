@@ -20,10 +20,10 @@ Copyright (C) 2004 Michael Droettboom
 
 try:
    from optparse import OptionParser, make_option, OptionConflictError
+   import ConfigParser
 except ImportError:
    from backport.optparse import OptionParser, make_option, OptionConflictError
-import ConfigParser
-
+   from backport import ConfigParser
 
 from os.path import isfile, expanduser, split, join
 from sys import platform
