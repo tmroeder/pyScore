@@ -1,0 +1,21 @@
+[\key<0> \key<-3> \key<+2> \key<"C"> \key<"e&">
+\clef<"f"> \clef<"f3"> \clef<"basso"> \clef<"g2-8"> \clef<"gg"> \clef<"perc">
+\meter<"2/4"> \meter<"3/8"> \meter<"C">
+\intens<"mf"> a \intens<"mp">(b c) \crescendo(a b c) \crescBegin:0 d e \crescBegin:1 f \crescEnd:0 g \crescEnd:1 |
+\tie(d e) _ |
+\tempo<"Allegro"> \tempo<"Presto", "1/4=32"> f g a |
+\slur(a b c) \staccato(d \tenuto(e) f)  |
+\turn({e&,f}) \turn({e&,f#}) \trill({d#,e&}) |
+\tremolo<32>(e& g b&) \tremolo<32>({e&, g, b&}) |
+\fermata \fermata(a) |
+\grace(a b c) \grace<32>(a b c) \cue(d e f) |
+\repeatBegin a b d e f \repeatEnd |
+\repeatBegin<3> a b c d e \repeatEnd<1>(f g) \repeatEnd<2>(g a) |
+\oct<+1> a b c \oct<-2>(c d e) |
+\beam( a/8 \beam( b c ) d ) \bar
+\stemsUp a b c \stemsDown(d e f) |
+\title<"A silly piece">
+\composer<"PDQ Bach">
+\lyric<"do">(a) \lyric<"wah">(b) |
+\accel a b c \accelBegin d e f \accelEnd \accel(a b c)
+]

@@ -1,0 +1,6 @@
+{
+ [
+   \beam( \beam(a/16 a a a) \beam(a a a a) ) |
+   \beam( \beam(a a ) \beam(a a) \beam(a a) \beam(a a) )
+ ]
+}

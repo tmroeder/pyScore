@@ -1,0 +1,7 @@
+{
+ [
+   \stemsUp c d e f g a b |
+   \stemsDown c d e f g a b |
+   \stemsAuto c d e f g a b |
+ ]
+}

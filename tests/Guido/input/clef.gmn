@@ -1,0 +1,16 @@
+{
+ [
+   \clef<"basso"> c d e f g a b |
+   \clef<"treble"> c d e f g a b |
+   \clef<"violino"> c d e f g a b |
+   \clef<"bass"> c d e f g a b |
+   \clef<"tenor"> c d e f g a b |
+   \clef<"alto"> c d e f g a b |
+   \clef<"f"> c d e f g a b | 
+   \clef<"g"> c d e f g a b |
+   \clef<"c"> c d e f g a b |
+   \clef<"perc"> c d e f g a b |
+   \clef<"gg"> c d e f g a b |
+   \clef<"f3"> c d e f g a b |
+ ]
+}

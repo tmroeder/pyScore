@@ -1,0 +1,21 @@
+{
+ [
+   \title<"L'Invitation au Voyage">
+   \composer<"Henri Duparc">
+   \lyricist<"Charles Beaudelaire">
+   \clef<"treble"> \key<+3> \meter<"9/8">
+   \staff<2>
+   \clef<"treble"> \key<+3> \meter<"9/8">
+     \beamBegin \slurBegin e/24 g# c#2
+   \staff<1>
+     b1 d2 b g# d b1 \slurEnd \beamEnd
+   \staff<2>
+     \beamBegin \slurBegin e/24 g# c#2
+   \staff<1>
+     b1 d2 b g# d b1 \slurEnd \beamEnd
+   \staff<2>
+     \beamBegin \slurBegin e/24 g# c#2
+   \staff<1>
+     b1 d2 b g# d b1 \slurEnd \beamEnd
+ ]
+}

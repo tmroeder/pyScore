@@ -1,0 +1,12 @@
+{
+ [ \staff<1>
+   _/2
+   \tie( f | f ) _ | 
+   \slur(c/4 d) \slur(e f) \slur(g a \slur(b a) g f ) |
+ ],
+ [
+   \staff<1>
+   \tie( d/1 |
+   d ) |
+ ]
+}

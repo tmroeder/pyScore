@@ -1,0 +1,2 @@
+[ \instrument<"Flute", "MIDI 23"> \tempo<120> \i<pp> \lyric<"oh"> \tie(c1*1/4 c) \repeatBegin \cresc<ff>( \lyric<"how">d \slur(e f g) a h c2 \repeatEnd ) \i<pp>({c, e, g})
+\octave<1>({c, e, g})] 

@@ -1,0 +1,7 @@
+{
+ [
+   \meter<"2/4"> a b |
+   \meter<"3/8"> c/8 d e |
+   \meter<"C"> c/4 d e f |
+ ]
+}

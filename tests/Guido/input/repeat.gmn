@@ -1,0 +1,9 @@
+{
+ [
+   \repeatBegin c d e c \repeatEnd |
+   \repeatBegin e f g/2 \repeatEnd |
+   \repeatBegin g/8 a g f e/4 c \repeatEnd |
+   \repeatBegin c g0 c1/2 \repeatEnd |
+   \repeatBegin c/4 e e/2 \repeatEnd<1>( f/4 a a/2 ) \repeatEnd<2>(d/4 b0 b/2)
+ ]
+}

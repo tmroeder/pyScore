@@ -1,0 +1,4 @@
+{ 
+ [ \tremolo<32>({e&,g,b&}) \tremolo<32>(c c2)
+ ]
+}

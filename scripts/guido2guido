@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+
+from pyScore.util.script_helpers import *
+from pyScore.MusicXML.validate import validate
+import pyScore.Guido.convert
+import pyScore.MusicXML.convert
+
+import sys
+
+convert(
+   [pyScore.Guido.convert, pyScore.MusicXML.convert],
+   Format("Guido", "gmn", "guido_file"),
+   Format("Guido", "new.gmn", "guido_file"))
+

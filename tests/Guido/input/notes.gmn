@@ -1,0 +1,15 @@
+{
+ [
+    c d e f g a h b |
+    c cis d dis e f fis g gis a ais h b |
+    do re me fa sol la si ti |
+    d1*3/4
+    c#-1/8
+    h&/6
+    _*2
+    c&&2/2.
+    cis/4..
+    fa##1
+    sol&0
+ ]
+}
