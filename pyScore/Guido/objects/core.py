@@ -414,7 +414,7 @@ class TAG(GUIDO_OBJECT):
             args = "<%s>" % ", ".join(items)
         else:
             args = ""
-        return "<Tag \\%s%s%s >" % (self.name, self.mode, args)
+        return "<Tag \\%s%s:%s%s >" % (self.name, self.mode, self.id, args)
 
     def _get_full_name(self):
         return "%s:%s" % (self.name, self.id)

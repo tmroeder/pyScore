@@ -1,5 +1,5 @@
 """
-A general wrapper around files for compression support
+A general wrapper around files for compression and en/decoding support
 
 Copyright (C) 2004 Michael Droettboom
 """
@@ -35,7 +35,8 @@ def FileWriter(filename, encoding="utf8"):
         fd = filename
     else:
         raise ValueError("Argument 1 of 'FileWriter' is not a filename or file object.")
-    return codecs.getwriter(encoding)(fd)
+    writer = codecs.getwriter(encoding)(fd, 'replace')
+    return writer
 
 def FileReader(filename, encoding="utf8"):
     if type(filename) in (StringType, UnicodeType):

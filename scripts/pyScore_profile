@@ -17,7 +17,11 @@ profile_file = "pyScore-%08d.profile" % i
 TEST_DIRECTORY = "profile"
 tests = [
    ("Guido", Format("Guido", "gmn", "guido_file"),
-    Format("MusicXML", "xml", "musicxml_file")),
+    Format("MusicXML", "xml", "musicxml_file"),
+    "", ""),
+   ("MusicXML", Format("MusicXML", "xml", "musicxml_file"),
+    Format("Guido", "gmn", "guido_file"),
+    "", "")
 ]
 
 def callback(input_file, output_file):

@@ -4,12 +4,11 @@
  \clef<"treble"> c d e f g a b |
  \clef<"bass"> c d e f g a b |
  \clef<"tenor"> c d e f g a b |
- \clef<"treble"> c d e f g a b |
+ \clef<"alto"> c d e f g a b |
  \clef<"bass"> c d e f g a b |
  \clef<"treble"> c d e f g a b |
- \clef<"treble"> c d e f g a b |
+ \clef<"alto"> c d e f g a b |
  \clef<"perc3"> c d e f g a b |
  \clef<"treble-8"> c d e f g a b |
  \clef<"f3"> c d e f g a b |
- |
 ]}

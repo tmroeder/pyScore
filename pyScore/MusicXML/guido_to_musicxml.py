@@ -18,7 +18,7 @@ Copyright (C) 2002 Michael Droettboom
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from pyScore.elementtree.ElementTree import Element, SubElement
+from pyScore.elementtree.ElementTree import Element, SubElement, tostring
 from pyScore.util.structures import *
 from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic.staff import staff as staff_tag
@@ -163,6 +163,7 @@ the Guido stream, such as stem direction..."""
             part_no += 1
 
    def make_parts(self, score_partwise, staff_layout, barlines):
+      # NOTE: Measures out-of-order in Guido are ignored
       used_sequences = []
       part_no = 1
       for i, group in enumerate(staff_layout):
@@ -170,6 +171,7 @@ the Guido stream, such as stem direction..."""
             collection = []
             part_tag = SubElement(score_partwise, "part", id="P" + str(part_no))
             num_staves = 0
+            first = True
             for sequence in part:
                if sequence not in used_sequences:
                   collection.extend(sequence.collection)
@@ -185,28 +187,31 @@ the Guido stream, such as stem direction..."""
             self.make_part(collection, barlines, part_tag, Rat(0, 1), measure, state)
             if state.last_ending != None:
                state.last_ending.set("type", "stop")
+            # Delete empty measures (if any) at end of part
+            if len(part_tag[-1]) == 0:
+               part_tag.remove(part_tag[-1])
             part_no += 1
 
    def make_part(self, collection, barlines, part, time_spine, measure, state):
+      last_item = None
       for item in collection:
          if isinstance(item, core.Empty):
             continue
          time_spine = self.adjust_time(time_spine, item.time_spine, measure)
+         if isinstance(item, core.TAG):
+            direction = SubElement(measure, "direction")
+            self.dispatch_tag(item, measure, direction, state)
+            if not len(direction):
+               measure.remove(direction)
+            else:
+               if item.parent.voice != None:
+                  SubElement(direction, "voice").text = str(item.parent.voice)
          if isinstance(item, (core.Barline, core.DURATIONAL)):
             if (state.measure_no < len(barlines) and
                 item.time_spine >= barlines[state.measure_no]):
                state.measure_no += 1
                measure = SubElement(
                   part, "measure", number=str(state.measure_no + 1))
-         if isinstance(item, core.TAG):
-            direction = SubElement(measure, "direction")
-            self.dispatch_tag(item, measure, direction, state)
-            if not len(direction):
-               measure.remove(direction)
-               direction = None
-            else:
-               if item.parent.voice != None:
-                  SubElement(direction, "voice").text = str(item.parent.voice)
          if isinstance(item, core.EVENT):
             direction = None
             self.make_note(item, measure, state)
@@ -214,6 +219,7 @@ the Guido stream, such as stem direction..."""
             direction = None
             self.make_chord(item, measure, state)
          time_spine += item.get_duration()
+         last_item = item
       return time_spine, measure
 
    def adjust_time(self, current, next, measure):
@@ -236,19 +242,21 @@ the Guido stream, such as stem direction..."""
 
    def make_note(self, item, measure, state, chord=False):
       note = SubElement(measure, "note")
+      ties = []
       if len(item.get_tag("grace")):
          SubElement(note, "grace", slash="yes")
          self.make_full_note(item, note, state, chord)
-         ties = self.make_tie(item, note, state)
+         if not chord:
+            ties = self.make_tie(item, note, state)
       elif len(item.get_tag("cue")):
          SubElement(note, "cue")
          self.make_full_note(item, note, state, chord)
          self.make_duration(item, note, state)
-         ties = []
       else:
          self.make_full_note(item, note, state, chord)
          self.make_duration(item, note, state)
-         ties = self.make_tie(item, note, state)
+         if not chord:
+            ties = self.make_tie(item, note, state)
       if item.parent.voice != None:
          SubElement(note, "voice").text = str(item.parent.voice)
       length, name = self.find_root_duration(item)
@@ -481,8 +489,9 @@ the Guido stream, such as stem direction..."""
    # barline tags
    
    def tag_doubleBar(self, tag, measure, direction, state):
-      barline = SubElement(measure, 'barline', location="left")
-      SubElement(barline, "bar-style").text = "light-light"
+      if len(measure) > 1:
+         barline = SubElement(measure, 'barline', location="left")
+         SubElement(barline, "bar-style").text = "light-light"
 
    # beam_stem tags
 
@@ -516,7 +525,8 @@ the Guido stream, such as stem direction..."""
       SubElement(clef, "sign").text = g2m_clef_type[type]
       SubElement(clef, "line").text = str(tag.clef_line)
       octave = int(tag.octave / 8) + octave_bias
-      SubElement(clef, "clef-octave-change").text = str(octave)
+      if octave != 0:
+         SubElement(clef, "clef-octave-change").text = str(octave)
 
    # dynamics tags
 

@@ -31,7 +31,9 @@ import os
 from os.path import exists, isfile
 from types import StringType, UnicodeType
 
-def guido_file_to_guido_string(input, input_encoding="utf8"):
+# NOTE: Guido is output with latin_1 encoding, because that seems to work with NoteServer
+
+def guido_file_to_guido_string(input, input_encoding="latin_1"):
    input = FileReader(input, input_encoding)
    return input.read()
 
@@ -41,14 +43,14 @@ def guido_string_to_guido_tree(s, warnings=False, trace=False):
    score = parser.parse(s)
    return score
 
-def guido_tree_to_guido_string(score, output_encoding="utf8"):
+def guido_tree_to_guido_string(score, output_encoding="latin_1"):
    assert isinstance(score, core.Score)
    stream = FileWriter(StringIO(), output_encoding)
    stream.write("% " + created + "\n")
    score.write_guido(stream)
    return stream.getvalue()
 
-def guido_tree_to_guido_file(score, filename=None, output_encoding="utf8"):
+def guido_tree_to_guido_file(score, filename=None, output_encoding="latin_1"):
    assert isinstance(score, core.Score)
    output = FileWriter(filename, output_encoding)
    output.write("% " + created + "\n")

@@ -21,6 +21,9 @@ Copyright (C) 2002 Michael Droettboom
 from inspect import getargspec
 import sys
 
+def dummy_function(percent):
+   pass
+
 class ConverterGraph:
    def __init__(self, modules):
       self.inputs = {}
@@ -61,16 +64,17 @@ class ConverterGraph:
       raise ValueError(
          "There is no way to convert '%s' to '%s'." % (input, output))
 
-   def run_steps(self, steps, input, **kwargs):
-      for step, a, b in steps:
+   def run_steps(self, steps, input, progress_callback=dummy_function, **kwargs):
+      for i, (step, a, b) in enumerate(steps):
          new_dict = {}
          for key in getargspec(step)[0]:
             if kwargs.has_key(key):
                new_dict[key] = kwargs[key]
          input = step(input, **new_dict)
+         progress_callback(float(i) / float(len(steps) - 1))
       return input
 
-def convert(input_format, output_format, input, stream=sys.stdout, **kwargs):
+def convert(input_format, output_format, input, stream=sys.stdout, progress_callback=dummy_function, **kwargs):
    converter = ConverterGraph(modules)
    steps = converter.get_steps(input_format.convertor, output_format.convertor)
    return converter.run_steps(input, stream=stream, **kwargs)

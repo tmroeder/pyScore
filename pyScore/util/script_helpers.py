@@ -28,6 +28,7 @@ try:
 except ImportError:
    from pyScore.util.backport import textwrap
 from pyScore.Guido import noteserver
+from pyScore.util.console import *
 
 from time import strftime
 from os.path import splitext, split, join, exists, isdir, isfile
@@ -38,8 +39,11 @@ from urllib import urlencode
 
 class ConverterOptions:
    def __init__(self, input_format, output_format, extra_args=None, description=None):
+      pretty_from = "%s (.%s)" % (input_format.name, input_format.ext),
+      pretty_to = "%s (.%s)" % (output_format.name, output_format.ext),
+
       if description == None:
-         description = "Converts %s to %s" % (input_format, output_format)
+         description = "Converts %s to %s" % (pretty_from, pretty_to)
       parser = OptionParser(description + "\nusage: \%prog [-o=output_file] [-w] [-v] [-t] input_file")
 
       parser.add_option("-o", "--output", dest="output",
@@ -50,6 +54,10 @@ class ConverterOptions:
                         help="Verbose feedback")
       parser.add_option("-t", "--trace", action="store_true", dest="trace",
                         help="Trace the actions of the parser")
+      parser.add_option("-g", "--gzip", action="store_true", dest="gzip",
+                        help="Save the result in gzip compressed form")
+      parser.add_option("-b", "--bzip2", action="store_true", dest="bzip2",
+                        help="Save the result in bzip2 compressed form")
       if extra_args:
          for arg, kwargs in extra_args:
             parser.add_option(*arg, **kwargs)
@@ -66,6 +74,17 @@ class ConverterOptions:
          if len(self.input_files) != 1:
             parser.error("Cannot specify an output file when converting multiple files.")
          self.output_file = options.output
+
+      if options.gzip and options.bzip:
+         parser.error("Can only specify one of --gzip or --bzip2.")
+      if options.gzip:
+         output_format.ext += ".gz"
+         if not self.output_file.endswith(".gz"):
+            self.output_file += ".gz"
+      elif options.bzip2:
+         output_format.ext += ".bz2"
+         if not self.output_file.endswith(".bz2"):
+            self.output_file += ".bz2"
       self.options = options
 
    def __getattr__(self, attr):
@@ -82,10 +101,7 @@ def convert(modules, input_format, output_format,
    from pyScore.convert import ConverterGraph
    assert isinstance(input_format, Format)
    assert isinstance(output_format, Format)
-   options = ConverterOptions(
-      "%s (.%s)" % (input_format.name, input_format.ext),
-      "%s (.%s)" % (output_format.name, output_format.ext),
-      extra_args=extra_args)
+   options = ConverterOptions(input_format, output_format, extra_args=extra_args)
 
    converter = ConverterGraph(modules)
    steps = converter.get_steps(input_format.converter, output_format.converter)
@@ -101,10 +117,11 @@ def convert(modules, input_format, output_format,
       for x in extra_dict:
          extras[x] = getattr(options, x)
       converter.run_steps(
-         steps, filename, filename=output,
+         steps, filename, filename=output, progress_callback=progress_callback,
          warnings=options.warnings, verbose=options.verbose, **extras)
       if callback:
          callback(options, filename, output)
+      print
 
 def _get_test_directories(test_dir, dir, groundtruth):
    root_dir = join(test_dir, dir)
@@ -214,7 +231,8 @@ def test(modules, test_dir, tests, groundtruth=False, callback=None):
          print "Converting '%s' to '%s'..." % (split(filename)[1], split(out_file)[1])
          sys.stdout.flush()
          try:
-            converter.run_steps(steps, filename, filename=out_file, warnings=True, verbose=True)
+            converter.run_steps(steps, filename, filename=out_file, progress_callback=progress_callback,
+                                warnings=True, verbose=True)
          except Exception, e:
             errors.append("Exception from '%s':\n\n" % filename)
             errors.extend(traceback.format_exception(*sys.exc_info()))
@@ -239,7 +257,7 @@ def test(modules, test_dir, tests, groundtruth=False, callback=None):
             document_file(doc_fd, filename)
             if documentation_header.find("(E)") == -1:
                document_file(doc_fd, out_file)
-
+         print
    if len(errors):
       print textwrap.fill("ERROR: The following files caused exceptions during conversion:")
       print "".join(errors)

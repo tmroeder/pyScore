@@ -65,7 +65,7 @@ m2g_clef_name = {
    'g2': 'treble',
    'f4': 'bass',
    'c4': 'tenor',
-   'c3': 'treble'}
+   'c3': 'alto'}
 g2m_named_meter = {
    'C': 'common',
    'C/': 'cut'}
@@ -107,3 +107,6 @@ m2g_words = {
    'cresc': 'crescendo',
    'diminuendo': 'diminuendo',
    'dim': 'diminuendo' }
+m2g_wedge = {
+   'crescendo': 'cresc',
+   'diminuendo': 'dim'}

@@ -3,7 +3,7 @@
  b&/4 \beamBegin:1 a/8 g \beamEnd:1 f#/4 \beamBegin:1 g/8 a \beamEnd:1 |
  b&/4 a \fermata( g ) |
 ],
-[\staff<1> \key<-2> \clef<"treble"> \meter<"C"> \stemsDown d1/4 |
+[\staff<1> \stemsDown d1/4 |
  \beamBegin:1 g/8 f \beamEnd:1 e&/4 d \beamBegin:1 d/8 f# \beamEnd:1 |
  g/4 f# \fermata( d ) |
 ],
@@ -11,7 +11,7 @@
  d/4 \beamBegin:1 c/8 b&0 \beamEnd:1 a/4 \beamBegin:1 b&/8 c1 \beamEnd:1 |
  \beamBegin:1 d e& \beamEnd:1 \beamBegin:1 a0 d1 \beamEnd:1 \fermata( b&0/4 ) |
 ],
-[\staff<2> \key<-2> \clef<"bass"> \meter<"C"> \stemsDown g-1/4 |
+[\staff<2> \stemsDown g-1/4 |
  g0 c \beamBegin:1 d/8 c \beamEnd:1 \beamBegin:1 b& a \beamEnd:1 |
  \beamBegin:1 g c \beamEnd:1 d/4 \fermata( g-1 ) |
 ]}

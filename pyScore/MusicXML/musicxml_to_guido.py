@@ -42,6 +42,7 @@ class MusicXMLToGuido:
    class State:
       def __init__(self):
          self.divisions = 144 # Is there a default divisions?
+         self.first_sequence = True
          self.stem_direction = None
          self.notations = {}
          self.wedges = {}
@@ -132,35 +133,39 @@ class MusicXMLToGuido:
 
    def make_sequences(self, tree, builder, state):
       builder.begin_Segment()
-      first = True
+      state.first_sequence = True
       for i, part in enumerate(tree.findall("./part")):
-         self.make_sequence(part, i+1, tree, first, builder, state)
-         first = False
+         self.make_sequence(part, i+1, tree, builder, state)
+         state.first_sequence = False
       builder.end_Segment()
 
-   def make_sequence(self, part, staff_number, tree, first, builder, state):
+   def make_sequence(self, part, staff_number, tree, builder, state):
       voices_used = SortedListSet([1])
       for voice in part.findall("./measure/note/voice"):
          if not int(voice.text) in voices_used:
             voices_used.add(int(voice.text))
+      state.first_voice = True
       for voice in voices_used.data:
+         state.lyrics = None
          builder.begin_Sequence()
          if len(voices_used.data) > 1:
             builder.add_Tag("staff", None, (staff_number,))
-         if first:
-            self.make_metadata(tree, builder, state)
+         self.make_metadata(tree, builder, state)
          first = False
          for measure in part.findall("./measure"):
             self.make_measure(measure, voice, builder, state)
          builder.end_Sequence()
+         state.first_voice = False
+         state.first_sequence = False
 
    def make_metadata(self, tree, builder, state):
-      for title in tree.findall("./work/work-title"):
-         builder.add_Tag("title", None, (title.text,))
-      for creator in tree.findall("./identification/creator"):
-         for type in supported_creators:
-            if creator.get("type") == type:
-               builder.add_Tag(type, None, (creator.text,))
+      if state.first_sequence:
+         for title in tree.findall("./work/work-title"):
+            builder.add_Tag("title", None, (title.text,))
+         for creator in tree.findall("./identification/creator"):
+            for type in supported_creators:
+               if creator.get("type") == type:
+                  builder.add_Tag(type, None, (creator.text,))
 
    def make_measure(self, measure, voice, builder, state):
       # We sort each measure by absolute time so that things are in order
@@ -183,15 +188,13 @@ class MusicXMLToGuido:
             time_spine += element.guido_duration
       
       # Filter notes and directions so we're only dealing with the current voice
+
+      # NOTE: Slurs are not converted from MusicXML to Guido, since slurs can start in one voice and end in another.  (This is not supported by Guido).
       filtered = []
       for element in measure:
          if element.tag in ("note", "direction"):
-            voice_tag = element.find("./voice")
-            if voice_tag != None:
-               if int(voice_tag.text) == voice:
-                  filtered.append(element)
-            else:
-               if voice == 1:
+            voice_tag = element.findtext("./voice") or "1"
+            if int(voice_tag) == voice:
                   filtered.append(element)
          elif not element.tag in ("forward", "backup"):
             filtered.append(element)
@@ -222,7 +225,7 @@ class MusicXMLToGuido:
       if pitch_tag != None:
          pitch_name = pitch_tag.findtext("./step").lower()
          octave = int(pitch_tag.findtext("./octave")) - 3
-         accidental = m2g_accidental[int(pitch_tag.findtext("./alter"))]
+         accidental = m2g_accidental[int(pitch_tag.findtext("./alter") or "0")]
          if chord:
             note = builder.add_Event_to_Chord(pitch_name, octave, accidental,
                                               duration.num, duration.den)
@@ -274,7 +277,7 @@ class MusicXMLToGuido:
                         self.end_dynamic_callback, builder, state)
       self.end_notation(articulations, g2m_articulations,
                         self.end_articulation_callback, builder, state)
-      self.begin_range("./notations/slur", "slur", note, builder, state)
+      # self.begin_range("./notations/slur", "slur", note, builder, state)
       self.begin_range("./notations/tied", "tie", note, builder, state)
       self.begin_notation(articulations, g2m_articulations,
                           self.begin_articulation_callback, builder, state)
@@ -288,8 +291,7 @@ class MusicXMLToGuido:
       self.single_notation(note, "./notations/fermata", self.end_fermata_callback, builder, state)
       self.single_notation(note, "./notations/technical/fingering", self.end_fingering_callback, builder, state)
       self.end_range("./notations/tied", "tie", note, builder, state)
-      self.end_range("./notations/slur", "slur", note, builder, state)
-
+      # self.end_range("./notations/slur", "slur", note, builder, state)
 
    def begin_lyric(self, element, builder, state):
       lyric = element.find("./lyric")
@@ -352,32 +354,34 @@ class MusicXMLToGuido:
       builder.add_to_Chord(note)
 
    def element_barline(self, element, builder, state):
-      if element.findtext("./bar-style") == "light-light":
-         builder.add_Tag("doubleBar", None, ())
-      repeat = element.find("./repeat")
-      ending = element.find("./ending")
-      if ending != None:
-         number = int(ending.get("number", "1"))
-         type = ending.get("type", "start")
-         if type == "start":
-            builder.add_Tag("repeatEnd", None, (number,), mode="Begin", use_parens=True)
-         elif type in ("stop", "discontinue"):
-            builder.add_Tag("repeatEnd", None, (), mode="End", use_parens=True)
-      elif repeat != None:
-         direction = repeat.get("direction", "backward")
-         times = int(repeat.get("times", "1"))
-         if direction == "forward":
-            if times > 1:
-               args = (times,)
-            builder.add_Tag("repeatBegin", None, args)
+      if state.first_voice:
+         if element.findtext("./bar-style") == "light-light":
+            builder.add_Tag("doubleBar", None, ())
+         repeat = element.find("./repeat")
+         ending = element.find("./ending")
+         if ending != None:
+            number = int(ending.get("number", "1"))
+            type = ending.get("type", "start")
+            if type == "start":
+               builder.add_Tag("repeatEnd", None, (number,), mode="Begin", use_parens=True)
+            elif type in ("stop", "discontinue"):
+               builder.add_Tag("repeatEnd", None, (), mode="End", use_parens=True)
+         elif repeat != None:
+            direction = repeat.get("direction", "backward")
+            times = int(repeat.get("times", "1"))
+            if direction == "forward":
+               if times > 1:
+                  args = (times,)
+               builder.add_Tag("repeatBegin", None, args)
+            else:
+               builder.add_Tag("repeatEnd", None, ())
          else:
-            builder.add_Tag("repeatEnd", None, ())
-      else:
-         builder.add_Barline()
+            builder.add_Barline()
 
    def element_attributes(self, element, builder, state):
-      for subelement in element:
-         self.dispatch_element(subelement, builder, state)
+      if state.first_voice:
+         for subelement in element:
+            self.dispatch_element(subelement, builder, state)
 
    def element_key(self, element, builder, state):
       fifths = int(element.findtext("./fifths"))
@@ -435,8 +439,8 @@ class MusicXMLToGuido:
       type = element.get("type")
       number = int(element.get("number", "1"))
       if type in ("crescendo", "diminuendo"):
-         builder.add_Tag(type + "Begin", number, ())
-         state.wedges[number] = type
+         builder.add_Tag(m2g_wedge[type] + "Begin", number, ())
+         state.wedges[number] = m2g_wedge[type]
       elif type == "stop":
          builder.add_Tag(state.wedges[number] + "End", number, ())
          del state.wedges[number]

@@ -103,6 +103,7 @@ class GuidoTreeBuilder:
          new_tag.args_list = []
          new_tag.args_dict = {}
          self.add(new_tag)
+      self._active_tags = []
       self.reset_collection(core.Sequence)
 
    def add_Event(self, *args, **kwargs):
@@ -113,6 +114,8 @@ class GuidoTreeBuilder:
 
    def add_Tag(self, *args, **kwargs):
       tag_obj = self.get_Tag(*args, **kwargs)
+      if isinstance(self.current_collection, core.Chord):
+         self.reset_collection()
       if tag_obj.mode == "Begin":
          self.add(tag_obj)
          self.add_active_tag(tag_obj)
@@ -182,10 +185,16 @@ class GuidoTreeBuilder:
       self.current_collection = self._stack[-1]
 
    def add_active_tag(self, tag_obj):
+      if tag_obj.name == "slur":
+         print "add_active_tag", tag_obj.id
+         print self._active_tags
       assert isinstance(tag_obj, core.TAG)
       self._active_tags.append(tag_obj)
       
    def remove_active_tag(self, tag_obj):
+      if tag_obj.name == "slur":
+         print "remove_active_tag", tag_obj.id
+         print self._active_tags
       assert isinstance(tag_obj, core.TAG)
       active_tags = self._active_tags
       for i in range(len(active_tags) - 1, -1, -1):
@@ -195,8 +204,8 @@ class GuidoTreeBuilder:
             del active_tags[i]
             return
       tag_obj.raise_error(
-         "'\\%sEnd' appears before '\\%sBegin'" %
-         (tag_obj.name, tag_obj.name))
+         "'\\%sEnd:%s' appears before '\\%sBegin'" %
+         (tag_obj.name, tag_obj.id, tag_obj.name))
 
    # Factories
 

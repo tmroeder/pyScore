@@ -28,7 +28,7 @@ def get_url_args(gmn_string, width="16.0cm", height="12.0cm", zoom=0.5, **kwargs
                      'defpw': str(width),
                      'zoom': str(zoom),
                      'mode': 'gif',
-                     'gmndata': gmn_string})
+                     'gmndata': gmn_string.encode("latin_1")})
    
 def get_url(gmn_string, server=NOTESERVER, **kwargs):
    """Get the URL to get a rendering of the given GMN string from the Guido Noteserver.

@@ -5,6 +5,7 @@
   \composer<"J. S. Bach">
   \clef<"treble"> \key<-1> \meter<"c">
   \tempo<"Andante", "1/4=100">
+  \stemsUp
   _/1 |
   a2/4 d/8. e/16 f/8. g/16 a/4 |
   b&/4 a/8. g/16 \tie(f/4 f/16) e f g |
@@ -87,7 +88,7 @@
 ],
 % PART II
 [ \staff<1>
-  \clef<"treble"> \key<-1> \meter<"c">
+  \stemsDown
   _/1 |
   _ | 
   _/2 d/4 a/8. g/16 |
@@ -171,6 +172,7 @@
 % PART III
 [   \staff<2>
 \clef<"bass"> \key<-1> \meter<"c">
+  \stemsUp
   _/1 |
   _ |
   _ | 
@@ -253,7 +255,7 @@
  ],
 % PART IV
 [  \staff<2>
-   \clef<"bass"> \key<-1> \meter<"c">
+  \stemsDown
   d0/2 a/4. g/8 |
   f/4. e/8 d/2 |
   c# d/4. e/8 |

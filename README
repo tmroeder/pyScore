@@ -29,9 +29,9 @@ Currently, the only features are:
 Download
 ========
 
-- `pyScore-0.1.tar.bz2 <pyScore-0.1.tar.bz2>`_ (144113 bytes)
-- `pyScore-0.1.tar.gz <pyScore-0.1.tar.gz>`_ (179799 bytes)
-- `pyScore-0.1.zip <pyScore-0.1.zip>`_ (267735 bytes)
+- `pyScore-0.1.tar.bz2 <pyScore-0.1.tar.bz2>`_ (145606 bytes)
+- `pyScore-0.1.tar.gz <pyScore-0.1.tar.gz>`_ (181431 bytes)
+- `pyScore-0.1.zip <pyScore-0.1.zip>`_ (271435 bytes)
 
 
 You can also `browse the CVS`__.
@@ -45,6 +45,8 @@ Pertaining to latest release (0.1):
 
 Notes
 -----
+
+- Guido is output with latin_1 encoding, because that seems to work with NoteServer [convert.py]
 
 - arguments to Guido beams are ignored [beam_stem.py]
 
@@ -60,7 +62,11 @@ Notes
 
 - Guido doesn't have named parts like MusicXML, so we grab it from the \\instrument tag [guido_to_musicxml.py]
 
+- Measures out-of-order in Guido are ignored [guido_to_musicxml.py]
+
 - trills, turns and mordents are much less specific in MusicXML than in GUIDO, so pitch name (but not the accidental) of auxiliary notes are thrown out, as well as any duration for the ornament [guido_to_musicxml.py]
+
+- Slurs are not converted from MusicXML to Guido, since slurs can start in one voice and end in another.  (This is not supported by Guido). [musicxml_to_guido.py]
 
 - Only the first verse of lyrics in MusicXML can be stored in Guido [musicxml_to_guido.py]
 
@@ -139,6 +145,45 @@ pretty-printing it yet.
 Installation
 ============
 
+Prerequisites
+-------------
+
+You'll need a copy of `libxml2/libxslt`__ with Python bindings
+installed.
+
+.. __: http://www.libxml.org
+
+Microsoft Windows
+`````````````````
+
+Stéphane Bidoul maintains installers of the `libxml2/libxslt Python
+bindings`__.  That's by far the easiest way to get this going on
+Windows.
+
+.. __: http://users.skynet.be/sbi/libxml-python/
+
+Linux
+`````
+
+To see if the libxml2/libxslt Python bindings are already installed,
+open a Python interpreter and type::
+
+  import libxml
+
+If you don't receive an error, you're good to go.
+
+If not, there's a good chance your distribution provides a binary package.
+For instance, on Fedora Core 1.0, the package is named
+``libxml2-python``.  Try installing it using your
+distribution-specific package installation tool (RPM, dpkg etc.)
+
+If that fails, you'll have to build it from source.
+
+Mac OS-X
+````````
+
+Coming soon...
+
 Building and installing from source
 -----------------------------------
 
@@ -169,7 +214,11 @@ Acknowledgements
 
 This package includes local copies of other third-party packages, so
 that it can be installed on a vanilla Python system.  I'd like to
-thank these über-programmers for their great work:
+thank these Ã¼ber-programmers for their great work:
+
+- MusicXML `DTDs and XSLTs`__ by Michael Good
+
+.. __: http://www.musicxml.com/
 
 - ElementTree__ by Frederich Lundh
 

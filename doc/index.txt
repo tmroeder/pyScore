@@ -60,6 +60,45 @@ pretty-printing it yet.
 Installation
 ============
 
+Prerequisites
+-------------
+
+You'll need a copy of `libxml2/libxslt`__ with Python bindings
+installed.
+
+.. __: http://www.libxml.org
+
+Microsoft Windows
+`````````````````
+
+Stéphane Bidoul maintains installers of the `libxml2/libxslt Python
+bindings`__.  That's by far the easiest way to get this going on
+Windows.
+
+.. __: http://users.skynet.be/sbi/libxml-python/
+
+Linux
+`````
+
+To see if the libxml2/libxslt Python bindings are already installed,
+open a Python interpreter and type::
+
+  import libxml
+
+If you don't receive an error, you're good to go.
+
+If not, there's a good chance your distribution provides a binary package.
+For instance, on Fedora Core 1.0, the package is named
+``libxml2-python``.  Try installing it using your
+distribution-specific package installation tool (RPM, dpkg etc.)
+
+If that fails, you'll have to build it from source.
+
+Mac OS-X
+````````
+
+Coming soon...
+
 Building and installing from source
 -----------------------------------
 
@@ -90,7 +129,11 @@ Acknowledgements
 
 This package includes local copies of other third-party packages, so
 that it can be installed on a vanilla Python system.  I'd like to
-thank these über-programmers for their great work:
+thank these Ã¼ber-programmers for their great work:
+
+- MusicXML `DTDs and XSLTs`__ by Michael Good
+
+.. __: http://www.musicxml.com/
 
 - ElementTree__ by Frederich Lundh
 
