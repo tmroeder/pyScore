@@ -208,16 +208,14 @@ the Guido stream, such as stem direction..."""
             direction = SubElement(measure, "direction")
             self.dispatch_tag(item, measure, direction, state)
             if not len(direction):
-               if hasattr(measure, 'remove'):
-                  measure.remove(direction)
+               measure.remove(direction)
             else:
                if item.parent.voice != None:
                   sound = direction.find("./sound")
                   SubElement(direction, "voice").text = str(item.parent.voice)
                   if sound is not None:
-                     if hasattr(direction, 'remove'):
-                        direction.remove(sound)
-                        direction.append(sound)
+                     direction.remove(sound)
+                     direction.append(sound)
          if isinstance(item, (core.Barline, core.DURATIONAL)):
             if (state.measure_no < len(barlines) and
                 item.time_spine >= barlines[state.measure_no]):

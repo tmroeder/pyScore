@@ -52,9 +52,9 @@ on-disk files.  Everything else is an in-memory data structure.
 Download
 ========
 
-- `pyScore-0.4.0.tar.bz2 <pyScore-0.4.0.tar.bz2>`_ (148007 bytes)
-- `pyScore-0.4.0.tar.gz <pyScore-0.4.0.tar.gz>`_ (182185 bytes)
-- `pyScore-0.4.0.zip <pyScore-0.4.0.zip>`_ (287571 bytes)
+- `pyScore-0.4.0.tar.bz2 <pyScore-0.4.0.tar.bz2>`_ (147997 bytes)
+- `pyScore-0.4.0.tar.gz <pyScore-0.4.0.tar.gz>`_ (182173 bytes)
+- `pyScore-0.4.0.zip <pyScore-0.4.0.zip>`_ (287591 bytes)
 
 
 You can also `browse the CVS`__.

@@ -78,7 +78,7 @@ __all__ = [
     "PI", "ProcessingInstruction",
     "QName",
     "SubElement",
-    "tostring"
+    "tostring",
     "TreeBuilder",
     "VERSION", "XML",
     "XMLTreeBuilder",
