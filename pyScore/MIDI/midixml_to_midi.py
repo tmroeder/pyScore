@@ -35,9 +35,9 @@ except ImportError:
 
 def get_channel(element, warnings):
    channel = int_range_check(
-      element.get("Channel"), 0, 15,
+      element.get("Channel"), 1, 16,
       "<%s Channel='x'>" % element.tag, warnings)
-   return channel
+   return channel - 1
 
 class MidiXMLToMidi:
    def __init__(self):
@@ -273,22 +273,26 @@ class MidiXMLToMidi:
                               "<SMPTEOffset Frame='x'>", warnings)
       fractional_frame = int_range_check(element.get("FractionalFrame"), 0, 99,
                                          "<SMPTEOffset FractionalFrame='x'>", warnings)
-      [write(str(x)) for x in [hour, minute, second, frame, fractional_frame]]
+      [write(chr(x)) for x in [hour, minute, second, frame, fractional_frame]]
 
    def event_TimeSignature(self, element, write, state):
       write(chr(META_EVENT))
       write(chr(TIME_SIGNATURE))
       write(chr(4))
       warnings = state.warnings
-      numerator = int_range_check(element.get("Numerator"), 0, MAX_8_BIT,
-                                  "<TimeSignature Numerator='x'>", warnings)
-      denominator = int_range_check(element.get("LogDenominator"), 0, MAX_8_BIT,
-                                    "<TimeSignature LogDenominator='x'>", warnings)
-      clocks_per_metro = int_range_check(element.get("MIDIClocksPerMetronomeClick"), 0, MAX_15_BIT,
-                                         "<TimeSignature MIDIClocksPerMetronomeClick='x'>", warnings)
-      per_24_clocks = int_range_check(element.get("ThirtySecondsPer24Clocks"), 0, MAX_8_BIT,
-                                      "<TimeSignature ThirtySecondsPer24Clocks='x'>", warnings)
-      [write(str(x)) for x in [numerator, denominator, clocks_per_metro, per_24_clocks]]
+      numerator = int_range_check(
+          element.get("Numerator"), 0, MAX_8_BIT,
+          "<TimeSignature Numerator='x'>", warnings)
+      denominator = int_range_check(
+          element.get("LogDenominator"), 0, MAX_8_BIT,
+          "<TimeSignature LogDenominator='x'>", warnings)
+      clocks_per_metro = int_range_check(
+          element.get("MIDIClocksPerMetronomeClick"), 0, MAX_15_BIT,
+          "<TimeSignature MIDIClocksPerMetronomeClick='x'>", warnings)
+      per_24_clocks = int_range_check(
+          element.get("ThirtySecondsPer24Clocks"), 0, MAX_8_BIT,
+          "<TimeSignature ThirtySecondsPer24Clocks='x'>", warnings)
+      [write(chr(x)) for x in [numerator, denominator, clocks_per_metro, per_24_clocks]]
 
    def event_KeySignature(self, element, write, state):
       write(chr(META_EVENT))

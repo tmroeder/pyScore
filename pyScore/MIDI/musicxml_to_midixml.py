@@ -37,7 +37,7 @@ config.add_option("", "--midi-format", type="int", default=1,
 
 def make_event(subevent, time_spine, ticks_per_quarter_note):
    event = Element("Event")
-   SubElement(event, "Absolute").text = str(int(float(time_spine) / float(ticks_per_quarter_note)))
+   SubElement(event, "Absolute").text = str(int(time_spine))
    event.time_spine = time_spine
    event.append(subevent)
    return event
@@ -70,7 +70,7 @@ class MusicXMLToMidiXML:
       return None
 
    def convert_duration(self, duration, divisions):
-      return int(float(duration) / float(divisions))
+      return float(duration) / float(divisions) * float(self._ticks_per_beat)
 
    def make_control_change14(self, msb_number, value, time_spine, state):
       value = int_range_check(value, 0, MAX_14_BIT, "Controller %d" % msb_number, state.warnings)
@@ -127,7 +127,7 @@ class MusicXMLToMidiXML:
                                                  music_xml.findall("./part-list//score-part"))):
          state.part_no = i + 1
          self.make_track(part, score_part, midi, meta_events, state)
-      
+
       meta_events.sort(lambda x, y: cmp(x.time_spine, y.time_spine))
       for event in meta_events:
          meta_track.append(event)
@@ -139,7 +139,7 @@ class MusicXMLToMidiXML:
          events = []
       else:
          events = meta_events
-      state.channel = state.part_no + 1
+      state.channel = state.part_no 
       state.dynamics = 64
       for element in score_part:
          self.dispatch_element(element, time_spine, events, meta_events, state)
