@@ -2,7 +2,7 @@
 pyScore
 =======
 
-Copyright 2004 Michael Droettboom
+Copyright 2004-2005 Michael Droettboom
 
 pyScore is a set of Python-based tools for working with symbolic music
 notation.
@@ -52,9 +52,9 @@ on-disk files.  Everything else is an in-memory data structure.
 Download
 ========
 
-- `pyScore-0.4.0.tar.bz2 <pyScore-0.4.0.tar.bz2>`_ (147997 bytes)
-- `pyScore-0.4.0.tar.gz <pyScore-0.4.0.tar.gz>`_ (182173 bytes)
-- `pyScore-0.4.0.zip <pyScore-0.4.0.zip>`_ (287591 bytes)
+- `pyScore-0.4.0.tar.bz2 <pyScore-0.4.0.tar.bz2>`_ (148056 bytes)
+- `pyScore-0.4.0.tar.gz <pyScore-0.4.0.tar.gz>`_ (182194 bytes)
+- `pyScore-0.4.0.zip <pyScore-0.4.0.zip>`_ (287579 bytes)
 
 
 You can also `browse the CVS`__.
@@ -213,7 +213,8 @@ Acknowledgements
 
 This package includes local copies of other third-party packages, so
 that it can be installed on a vanilla Python system.  I'd like to
-thank these ÃÂ¼ber-programmers for their great work:
+thank these uber-programmers for their great work, without which
+writing pyScore would have been much more difficult:
 
 - MusicXML and MidiXML `DTDs and XSLTs`__ by Michael Good
 
