@@ -20,16 +20,18 @@ Currently, the only features are:
 - Extracting absolute times for Guido_ events
 - Guido_ to MusicXML_ conversion
 - MusicXML_ to Guido_ conversion
+- Obtaining rendered music images from the Guido_ Noteserver_.
 
-.. _Guido: http://www.noteserver.org/
+.. _Guido: http://www.salieri.org/guido/
+.. _Noteserver: http://www.noteserver.org/
 .. _MusicXML: http://www.musicxml.com/
 
 Download
 ========
 
-- `pyScore-0.1.tar.bz2 <pyScore-0.1.tar.bz2>`_ (129451 bytes)
-- `pyScore-0.1.tar.gz <pyScore-0.1.tar.gz>`_ (158884 bytes)
-- `pyScore-0.1.zip <pyScore-0.1.zip>`_ (249761 bytes)
+- `pyScore-0.1.tar.bz2 <pyScore-0.1.tar.bz2>`_ (144113 bytes)
+- `pyScore-0.1.tar.gz <pyScore-0.1.tar.gz>`_ (179799 bytes)
+- `pyScore-0.1.zip <pyScore-0.1.zip>`_ (267735 bytes)
 
 
 You can also `browse the CVS`__.
@@ -60,7 +62,15 @@ Notes
 
 - trills, turns and mordents are much less specific in MusicXML than in GUIDO, so pitch name (but not the accidental) of auxiliary notes are thrown out, as well as any duration for the ornament [guido_to_musicxml.py]
 
+- Only the first verse of lyrics in MusicXML can be stored in Guido [musicxml_to_guido.py]
+
 - There is no way to represent <senza-misura> and type="single-number" [musicxml_to_guido.py]
+
+- Tempo names are not converted from MusicXML -> Guido, only metronome markings [musicxml_to_guido.py]
+
+- There is a limited vocabulary of written directions that get converted from [musicxml_to_guido.py]
+
+- Markings followed by dashes is not supported by MusicXML -> Guido [musicxml_to_guido.py]
 
 Bugs or shortcomings in other systems
 -------------------------------------
@@ -88,6 +98,10 @@ Bugs or shortcomings in other systems
 To-dos
 ------
 
+- add support for custom namespace resolvers/default namespaces [ElementTree.py]
+
+- add support for incremental parsing [ElementTree.py]
+
 - document GuidoToMusicXML.make_plan because it's really hairy [guido_to_musicxml.py]
 
 - support word-based (as opposed to wedge-based) *cresc.* and *dim.* [guido_to_musicxml.py]
@@ -97,10 +111,6 @@ To-dos
 - MusicXML -> Guido ornament handling [musicxml_to_guido.py]
 
 - check that we have ``xmllint`` and use it [validate.py]
-
-- add support for custom namespace resolvers/default namespaces [ElementTree.py]
-
-- add support for incremental parsing [ElementTree.py]
 
 Longer-term plans
 -----------------

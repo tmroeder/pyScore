@@ -628,14 +628,17 @@ class ElementTree:
     # @param file A file name, or a file object opened for writing.
     # @param encoding Optional output encoding (default is US-ASCII).
 
-    def write(self, file, encoding="us-ascii"):
+    def write(self, file, encoding="us-ascii", comment="", doctype=""):
         assert self._root is not None
         if not hasattr(file, "write"):
             file = open(file, "wb")
         if not encoding:
             encoding = "us-ascii"
-        elif encoding != "utf-8" and encoding != "us-ascii":
-            file.write("<?xml version='1.0' encoding='%s'?>\n" % encoding)
+        # Changes by MGD
+        file.write("<?xml version='1.0' encoding='%s'?>\n" % encoding)
+        if comment != "":
+            file.write("<!-- %s -->\n" % comment)
+        file.write(doctype + "\n")
         self._write(file, self._root, encoding, {})
 
     def _write(self, file, node, encoding, namespaces):

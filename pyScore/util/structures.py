@@ -184,6 +184,40 @@ class Grouper:
            bl = [b]
      self.data.append(al + bl)
 
+class OverlappingRanges:
+    def __init__(self, max_levels=10):
+        self._data = {}
+        self._max_levels = max_levels
+
+    def begin(self, obj, message="items"):
+        if self._data.has_key(obj):
+            raise ValueError("%s already in set." % obj)
+        i = 1
+        values = self._data.values()
+        while i < self._max_levels:
+            if not i in values:
+                break
+            i += 1
+        if i >= self._max_levels:
+            raise ValueError("Too many overlapping %s" % message)
+        self._data[obj] = i
+        return i
+
+    def end(self, obj):
+        result = self._data[obj]
+        del self._data[obj]
+        return result
+
+    def get_number(self, obj):
+        return self._data[obj]
+
+class DefaultDictionary(dict):
+    def __init__(self, cls):
+        self._cls = cls
+
+    def __getitem__(self, item):
+        return self.setdefault(item, self._cls())
+
 if not __builtins__.has_key("enumerate"):
     def enumerate(collection):
         """Backport to 2.2 of Python 2.3's enumerate function."""
@@ -195,5 +229,5 @@ if not __builtins__.has_key("enumerate"):
     __builtins__['enumerate'] = enumerate
 
 __all__ = """
-SortedListSet Grouper enumerate
+SortedListSet Grouper DefaultDictionary OverlappingRanges
 """.split()

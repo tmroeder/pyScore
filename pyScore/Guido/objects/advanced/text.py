@@ -25,10 +25,10 @@ from pyScore.Guido.objects.basic.text import TEXT
 class lyrics(TEXT):
    def __init__(self, name, id, args_list, args_dict, *args, **kwargs):
       TEXT.__init__(self, name, id, args_list, args_dict, *args, **kwargs)
-      # We do some pretty funny text-mangling here to separate lyrics
-      # into syllables
-      text = self.text
-      text = text.replace("-", "- -").replace("_", "_ _")
+      self.parse_lyrics()
+
+   def parse_lyrics(self):
+      text = self.text.replace("-", "- -").replace("_", "_ _")
       self.syllables = [x.replace("~", " ").replace("__", "_")
                         for x in text.split()]
 

@@ -1,3 +1,4 @@
+% Created with pyScore 0.1 by Michael Droettboom <http://dkc.jhu.edu/~mdboom/pyScore>
 {[\tempo<"Allegro"> c1/4 d e f g a b c2 |
  \tempo<"Presto", "1/4=200"> c1 d e f g a b c2 |
  \accelBegin d e f \accelEnd]}

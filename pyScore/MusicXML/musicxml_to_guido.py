@@ -45,6 +45,7 @@ class MusicXMLToGuido:
          self.stem_direction = None
          self.notations = {}
          self.wedges = {}
+         self.lyrics = None
 
    def convert(self, tree):
       # TODO: deal with time-wise MusicXML scores (e.g. use Michael Good's XSLT transform first)
@@ -132,18 +133,20 @@ class MusicXMLToGuido:
    def make_sequences(self, tree, builder, state):
       builder.begin_Segment()
       first = True
-      for part in tree.findall("./part"):
-         self.make_sequence(part, tree, first, builder, state)
+      for i, part in enumerate(tree.findall("./part")):
+         self.make_sequence(part, i+1, tree, first, builder, state)
          first = False
       builder.end_Segment()
 
-   def make_sequence(self, part, tree, first, builder, state):
+   def make_sequence(self, part, staff_number, tree, first, builder, state):
       voices_used = SortedListSet([1])
       for voice in part.findall("./measure/note/voice"):
          if not int(voice.text) in voices_used:
             voices_used.add(int(voice.text))
       for voice in voices_used.data:
          builder.begin_Sequence()
+         if len(voices_used.data) > 1:
+            builder.add_Tag("staff", None, (staff_number,))
          if first:
             self.make_metadata(tree, builder, state)
          first = False
@@ -212,6 +215,7 @@ class MusicXMLToGuido:
       if not chord:
          self.begin_beam(element, builder, state)
          self.begin_notations(element, builder, state)
+         self.begin_lyric(element, builder, state)
       duration = element.guido_duration
       pitch_tag = element.find("./pitch")
       rest_tag = element.find("./rest")
@@ -229,8 +233,9 @@ class MusicXMLToGuido:
          note = builder.add_Event_not_in_Chord("_", num=duration.num, den=duration.den)
 
       if not chord:
-         self.end_beam(element, builder, state)
+         self.end_lyric(element, builder, state)
          self.end_notations(element, builder, state)
+         self.end_beam(element, builder, state)
 
    def make_stems(self, element, builder, state):
       stem_direction = element.find("./stem")
@@ -285,6 +290,40 @@ class MusicXMLToGuido:
       self.end_range("./notations/tied", "tie", note, builder, state)
       self.end_range("./notations/slur", "slur", note, builder, state)
 
+
+   def begin_lyric(self, element, builder, state):
+      lyric = element.find("./lyric")
+      if lyric == None or lyric.get("number", "1") != "1":
+         if state.lyrics != None:
+            builder.add_Tag("lyricsEnd", None, (), use_parens=True)
+            state.lyrics = None
+      else:
+         # NOTE: Only the first verse of lyrics in MusicXML can be stored in Guido
+         if state.lyrics == None:
+            state.lyrics = builder.add_Tag("lyricsBegin", None, ("",), use_parens=True)
+         syllable = lyric.findtext("./text") or ""
+         syllabic = lyric.findtext("./syllabic")
+         space_before = True
+         if lyric.find("./extend") != None:
+            if not len(syllable):
+               syllable = "_"
+               space_before = False
+         if syllabic in ("begin", "middle"):
+            syllable += "-"
+         if syllabic in ("middle", "end"):
+            space_before = False
+         if space_before and len(state.lyrics.text) and not state.lyrics.text.endswith(" "):
+            state.lyrics.text += " "
+         state.lyrics.text += syllable
+         state.lyrics.args_list[0] = state.lyrics.text
+
+   def end_lyric(self, element, builder, state):
+      lyric = element.find("./lyric")
+      if lyric != None:
+         if lyric.find("./end-line") != None or lyric.find("./end-paragraph") != None:
+            builder.add_Tag("lyricsEnd", None, (), use_parens=True)
+            state.lyrics = None
+
    def begin_articulation_callback(self, articulation, builder):
       builder.add_Tag(articulation, None, (), mode="Begin", use_parens=True)
 
@@ -315,6 +354,24 @@ class MusicXMLToGuido:
    def element_barline(self, element, builder, state):
       if element.findtext("./bar-style") == "light-light":
          builder.add_Tag("doubleBar", None, ())
+      repeat = element.find("./repeat")
+      ending = element.find("./ending")
+      if ending != None:
+         number = int(ending.get("number", "1"))
+         type = ending.get("type", "start")
+         if type == "start":
+            builder.add_Tag("repeatEnd", None, (number,), mode="Begin", use_parens=True)
+         elif type in ("stop", "discontinue"):
+            builder.add_Tag("repeatEnd", None, (), mode="End", use_parens=True)
+      elif repeat != None:
+         direction = repeat.get("direction", "backward")
+         times = int(repeat.get("times", "1"))
+         if direction == "forward":
+            if times > 1:
+               args = (times,)
+            builder.add_Tag("repeatBegin", None, args)
+         else:
+            builder.add_Tag("repeatEnd", None, ())
       else:
          builder.add_Barline()
 
@@ -389,3 +446,19 @@ class MusicXMLToGuido:
       direction = element.get('type', 'up')
       octave = m2g_octave_shift[direction] + str((abs(size) - 1) / 7)
       builder.add_Tag('oct', None, (octave,))
+      
+   def element_metronome(self, element, builder, state):
+      # NOTE: Tempo names are not converted from MusicXML -> Guido, only metronome markings
+      beat_unit = m2g_duration_type[element.findtext("./beat-unit")]
+      per_minute = int(element.findtext("./per-minute"))
+      dots = "." * len(element.findall("./beat-unit-dot"))
+      builder.add_Tag("tempo", None, ("%d/%d%s=%d" % (beat_unit.num, beat_unit.den, dots, per_minute),))
+
+   def element_words(self, element, builder, state):
+      # NOTE: There is a limited vocabulary of written directions that get converted from
+      # MusicXML to Guido.  This conversion is not very smart or robust.
+
+      # NOTE: Markings followed by dashes is not supported by MusicXML -> Guido
+      text = element.text.replace(".", "")
+      if m2g_words.has_key(text):
+         builder.add_Tag(m2g_words[text], None, ())

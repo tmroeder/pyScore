@@ -22,7 +22,9 @@ from pyScore.Guido.objects import core
 from pyScore.Guido.objects.basic import all as basic
 from pyScore.Guido.objects.advanced import all as advanced
 from pyScore.Guido.parser.guido_parser import GuidoParser
+from pyScore.Guido.noteserver import save_gif
 from pyScore.util.file_wrapper import *
+from pyScore.__version__ import *
 
 from cStringIO import StringIO
 import os
@@ -42,14 +44,19 @@ def guido_string_to_guido_tree(s, warnings=False, trace=False):
 def guido_tree_to_guido_string(score, output_encoding="utf8"):
    assert isinstance(score, core.Score)
    stream = FileWriter(StringIO(), output_encoding)
+   stream.write("% " + created + "\n")
    score.write_guido(stream)
    return stream.getvalue()
 
 def guido_tree_to_guido_file(score, filename=None, output_encoding="utf8"):
    assert isinstance(score, core.Score)
    output = FileWriter(filename, output_encoding)
+   output.write("% " + created + "\n")
    score.write_guido(output)
 
+def guido_string_to_image(gmn_string, filename=None, width="16.0cm", height="12.0cm", zoom=0.5):
+   save_gif(gmn_string, filename)
+
 inputs = ["guido_file", "guido_string", "guido_tree"]
-outputs = inputs
+outputs = ["guido_file", "guido_string", "guido_tree", "image"]
 

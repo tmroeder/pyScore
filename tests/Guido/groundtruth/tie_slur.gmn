@@ -1,7 +1,6 @@
+% Created with pyScore 0.1 by Michael Droettboom <http://dkc.jhu.edu/~mdboom/pyScore>
 {[\staff<1> _/2 \tie( f1 |
  f ) _ |
- \slur( c/4 d ) \slur( e f ) \slur( g a \slur( b a ) g f ) |
-],
+ \slur( c/4 d ) \slur( e f ) \slur( g a \slur( b a ) g f )],
 [\staff<1> \tie( d1/1 |
- d ) |
-]}
+ d )]}

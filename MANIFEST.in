@@ -1,6 +1,6 @@
 recursive-include doc *.txt *.py *.css
 
-recursive-include examples/Guido/*.gmn
+recursive-include examples/Guido *.gmn
 
 recursive-include tests/Guido/input *.gmn
 recursive-include tests/Guido/groundtruth *.gmn *.xml

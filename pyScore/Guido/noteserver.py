@@ -1,5 +1,5 @@
 """
-Tools for interacting with Guido NoteServer
+Tools for interacting with the Guido NoteServer
 Python GUIDO tools
 
 Copyright (C) 2002 Michael Droettboom
@@ -18,13 +18,30 @@ Copyright (C) 2002 Michael Droettboom
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from urllib import urlencode
+from urllib import urlencode, urlopen
 
-def get_url(gmn_string):
-   url = "http://tempo.iti.informatik.tu-darmstadt.de/scripts/salieri/gifserv.pl?"
-   url += urlencode({'defph': '12.0cm',
-                     'defpw': '16.0cm',
-                     'zoom': '0.5',
+NOTESERVER = "http://tempo.iti.informatik.tu-darmstadt.de/scripts/salieri/gifserv.pl"
+
+def get_url_args(gmn_string, width="16.0cm", height="12.0cm", zoom=0.5, **kwargs):
+   """Get the CGI arguments to send to the GUIDO noteserver"""
+   return urlencode({'defph': str(height),
+                     'defpw': str(width),
+                     'zoom': str(zoom),
                      'mode': 'gif',
                      'gmndata': gmn_string})
-   return url
+   
+def get_url(gmn_string, server=NOTESERVER, **kwargs):
+   """Get the URL to get a rendering of the given GMN string from the Guido Noteserver.
+An alternate Noteserver can be specified with the server argument."""
+   return server + "?" + get_url_args(gmn_string, **kwargs)
+
+def get_gif_handle(gmn_string, server=NOTESERVER, **kwargs):
+   """Gets a file handle to a GIF file of a rendering of the given GMN string from the Guido Noteserver.
+An alternate Noteserver can be specified with the server argument."""
+   return urlopen(server, get_url_args(gmn_string, **kwargs))
+
+def save_gif(gmn_string, filename, **kwargs):
+   """Saves a rendering of the given GMN string from the Guido Noteserver to the given filename.
+An alternate Noteserver can be specified with the server argument."""
+   open(filename, "wb").write(get_gif_handle(gmn_string, **kwargs).read())
+   

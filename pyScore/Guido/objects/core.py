@@ -453,7 +453,6 @@ class TAG(GUIDO_OBJECT):
             stream.write("(")
 
     def is_first(self, note):
-        print note, self.events
         for n in self.events:
             if isinstance(n, (Note, Chord)):
                 if isinstance(n, Note):

@@ -33,26 +33,23 @@ class clef(TAG):
                      'c': 3,
                      'perc': 3,
                      'gg': 2}
-    regex = re.compile(r"(?P<type>(gg)|[gfc]|(perc)|)(?P<line>[1-5])?(?P<octave>(\+8)|(\-8)|(\+15)|(\-15))?$")
+    regex = re.compile(r"(?:(?P<named>(treble)|(violino)|(basso?)|(tenor)|(alto))|(?:(?P<type>(gg)|[gfc]|(perc)|)(?P<line>[1-5])?))(?P<octave>(\+8)|(\-8)|(\+15)|(\-15))?$")
     
     def __init__(self, name, id, args_list, args_dict, *args, **kwargs):
         TAG.__init__(self, name, id, args_list, args_dict, *args, **kwargs)
         if len(args_list) < 1:
             self.raise_error("Invalid number of arguments on \\clef tag.")
         s = args_list[0]
-        self.clef_name = s
-        for clef_name, setting in self.clef_names.items():
-            if s.startswith(clef_name):
-                self.type, self.clef_line = setting
-                self.octave = 0
-                if len(s) > len(clef_name):
-                    self.octave = int(s[len(clef_name):])
-                return
         match = self.regex.match(s)
+        self.clef_name = ""
         if match != None:
             match = match.groupdict()
-            self.type = match['type']
-            self.clef_line = match['line']
+            if match['named'] != None:
+                self.clef_name = match['named']
+                self.type, self.clef_line = self.clef_names[self.clef_name]
+            else:
+                self.type = match['type']
+                self.clef_line = match['line']
             self.octave = match['octave']
             if self.clef_line == None:
                 self.clef_line = self.default_lines[self.type]

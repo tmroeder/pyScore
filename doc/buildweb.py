@@ -19,6 +19,8 @@ Copyright (C) 2004 Michael Droettboom
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+import sys
+
 try:
    from docutils.core import publish_file
 except ImportError, e:
@@ -26,7 +28,7 @@ except ImportError, e:
    print "It can be downloaded at http://docutils.sf.net"
    sys.exit(1)
 
-from pyScore.__version__ import __version__
+from pyScore.__version__ import *
 from pyScore.util.source import get_notes
 
 from cStringIO import StringIO
@@ -57,7 +59,7 @@ print "Getting source code notes..."
 release_notes = get_notes(SRC_DIR)
 
 parts = {"downloads": ''.join(downloads),
-         "version": __version__,
+         "version": version,
          "release_notes": release_notes }
 
 filled_in = source % parts

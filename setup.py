@@ -25,7 +25,7 @@ from glob import glob
 from os.path import walk, split, join, isdir
 import sys
 
-from pyScore.__version__ import __version__
+from pyScore.__version__ import *
 
 ########################################
 # Packages
@@ -33,10 +33,12 @@ from pyScore.__version__ import __version__
 packages = []
 if sys.platform != 'win32':
    def visit(arg, dirname, names):
-      packages.append(".".join(dirname.split("/")))
+      if '__init__.py' in names:
+         packages.append(".".join(dirname.split("/")))
 else:
    def visit(arg, dirname, names):
-      packages.append(".".join(dirname.split("\\")))
+      if '__init__.py' in names:
+         packages.append(".".join(dirname.split("\\")))
 walk("pyScore", visit, ())
 
 ########################################
@@ -66,9 +68,9 @@ else:
                            define_macros=[('NDEBUG', 1)])]
 
 setup(name = "pyScore",
-      version = __version__,
-      url = "http://dkc.jhu.edu/~mdboom/",
-      author = "Michael Droettboom",
+      version = version,
+      url = url,
+      author = author,
       author_email = "mdboom@jhu.edu",
       packages = packages,
       scripts = scripts,

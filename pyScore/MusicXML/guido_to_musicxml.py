@@ -53,10 +53,10 @@ elementtree."""
       """The state object stores state of various flags that can be changed in
 the Guido stream, such as stem direction..."""
       def __init__(self):
-         self.stem_direction = None
-         self.active_beams = []
-         self.active_slurs = []
-         self.active_ties = []
+         self.stem_direction = {}
+         self.active_beams = DefaultDictionary(OverlappingRanges)
+         self.active_slurs = OverlappingRanges()
+         self.active_ties = OverlappingRanges()
          self.measure_no = 0
          self.last_tuplet = None
          self.last_ending = None
@@ -260,13 +260,14 @@ the Guido stream, such as stem direction..."""
          if g2m_accidental.has_key(item.accidental):
             SubElement(note, "accidental").text = g2m_accidental[item.accidental]
       self.make_time_modification(length, name, item, note, state)
-      if not state.stem_direction is None:
-         SubElement(note, "stem").text = state.stem_direction
+      if state.stem_direction.has_key(item.parent.voice):
+         SubElement(note, "stem").text = state.stem_direction[item.parent.voice]
       if item.parent.cross_staff:
          SubElement(note, "staff").text = str(item.staff)
-      notations = SubElement(note, "notations")
       if not chord:
          self.make_tremolo_and_beam(item, note, state)
+      notations = SubElement(note, "notations")
+      if not chord:
          for tie in ties:
             notations.append(tie)
          self.make_tuplet(length, name, item, notations, state)
@@ -311,15 +312,13 @@ the Guido stream, such as stem direction..."""
          type = []
          if tie.is_first(item):
             type = ["start"]
-            state.active_ties.append(tie)
-            tie.number = number = len(state.active_ties)
+            number = state.active_ties.begin(tie, "ties")
          elif tie.is_last(item):
             type = ["stop"]
-            number = tie.number
-            state.active_ties.remove(tie)
+            number = state.active_ties.end(tie)
          else:
             type = ["start", "stop"]
-            number = tie.number
+            number = state.active_ties.get_number(tie)
          for t in type:
             element = SubElement(note, "tie", type=t)
             result.append(Element("tied", type=t, number=str(number)))
@@ -358,16 +357,14 @@ the Guido stream, such as stem direction..."""
       # EXT: secondary beaming doesn't seem to work in Turandot
       for beam in item.get_tag("beam"):
          if beam.is_first(item):
-            state.active_beams.append(beam)
-            beam.number = number = len(state.active_beams)
+            number = state.active_beams[item.parent.voice].begin(beam, "beams")
             type = "begin"
          elif beam.is_last(item):
-            number = beam.number
-            state.active_beams.remove(beam)
+            number = state.active_beams[item.parent.voice].end(beam)
             type = "end"
          else:
+            number = state.active_beams[item.parent.voice].get_number(beam)
             type = "continue"
-            number = beam.number
          SubElement(note, "beam", number=str(number)).text = type
 
    def make_tuplet(self, length, name, item, notations, state):
@@ -385,12 +382,10 @@ the Guido stream, such as stem direction..."""
          type = None
          if slur.is_first(item):
             type = "start"
-            state.active_slurs.append(slur)
-            slur.number = number = len(state.active_slurs)
+            number = state.active_slurs.begin(slur, "slurs")
          elif slur.is_last(item):
             type = "stop"
-            number = slur.number
-            state.active_slurs.remove(slur)
+            number = state.active_slurs.end(slur)
          if type:
             SubElement(notations, "slur", type=type, number=str(number))
 
@@ -492,16 +487,16 @@ the Guido stream, such as stem direction..."""
    # beam_stem tags
 
    def tag_stemsAuto(self, tag, measure, direction, state):
-      state.stem_direction = None
+      del state.stem_direction[tag.parent.voice]
 
    def tag_stemsUp(self, tag, measure, direction, state):
-      state.stem_direction = "up"
+      state.stem_direction[tag.parent.voice] = "up"
 
    def tag_stemsDown(self, tag, measure, direction, state):
-      state.stem_direction = "down"
+      state.stem_direction[tag.parent.voice] = "down"
 
    def tag_stemsUpEnd(self, tag, measure, direction, state):
-      state.stem_direction = None
+      del state.stem_direction[tag.parent.voice]
    tag_stemsDownEnd = tag_stemsUpEnd
 
    # clef tags
@@ -595,7 +590,8 @@ the Guido stream, such as stem direction..."""
       if tag.mode == "Begin":
          if len(tag.events):
             if state.last_ending != None:
-               state.last_ending.set("type", "stop")
+               state.last_ending.find("./ending").set("type", "stop")
+               SubElement(state.last_ending, "repeat", direction="backward")
             state.last_ending = SubElement(barline, "ending", type="start",
                                            number=str(tag.repetition))
       else:
@@ -603,19 +599,24 @@ the Guido stream, such as stem direction..."""
 
    def tag_repeatEndEnd(self, tag, measure, direction, state):
       barline = SubElement(measure, "barline")
-      state.last_ending = SubElement(barline, "ending", type="discontinue",
-                                     number=str(tag.repetition))
+      state.last_ending = barline
+      SubElement(barline, "ending", type="discontinue",
+                 number=str(tag.repetition))
 
    # tempo tags
 
    def tag_tempo(self, tag, measure, direction, state):
       # EXT: tempo tags don't seem to work in Turandot
+      length, name = self.find_root_duration(tag)
       direction_type = SubElement(direction, "direction-type")
       metronome = SubElement(direction_type, "metronome")
-      SubElement(metronome, "beat-unit").text = str(tag.den)
-      if tag.dots:
-         SubElement(metronome, "beat-unit-dot").text = str(tag.dots)
+      SubElement(metronome, "beat-unit").text = name
+      for dot in range(tag.dots):
+         SubElement(metronome, "beat-unit-dot")
       SubElement(metronome, "per-minute").text = str(tag.bpm)
+      if tag.tempo_name != None:
+         direction_type = SubElement(direction, "directon-type")
+         SubElement(direction_type, "words").text = tag.tempo_name
       sound = SubElement(measure, "sound",
                          tempo = str(int((tag.bpm * 4 * tag.num) / tag.den)))
 
@@ -633,9 +634,8 @@ the Guido stream, such as stem direction..."""
    tag_ritardando = tag_accelerando
 
    def tag_accelerandoEnd(self, tag, measure, direction, state):
-      if len(tag.events):
-         direction_type = SubElement(direction, "direction-type")
-         SubElement(direction_type, "dashes", type="stop")
+      direction_type = SubElement(direction, "direction-type")
+      SubElement(direction_type, "dashes", type="stop")
    tag_ritardandoEnd = tag_accelerandoEnd
 
    # text tags

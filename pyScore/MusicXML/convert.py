@@ -23,6 +23,8 @@ from pyScore.Guido.objects.basic import all as basic
 from pyScore.Guido.objects.advanced import all as advanced
 from pyScore.elementtree.ElementTree import ElementTree, iselement, parse
 from pyScore.util.file_wrapper import *
+from pyScore.__version__ import *
+
 from guido_to_musicxml import GuidoToMusicXML
 from musicxml_to_guido import MusicXMLToGuido
 
@@ -33,27 +35,22 @@ def guido_tree_to_musicxml_elementtree(score, warnings=False, verbose=False):
    converter = GuidoToMusicXML(warnings=warnings, verbose=verbose)
    return converter.convert(score)
 
-def musicxml_elementtree_to_xml_elementtree(tree):
+def musicxml_elementtree_to_musicxml_file(tree, filename=None, output_encoding="ascii"):
    assert iselement(tree)
-   return tree
+   ElementTree(tree).write(FileWriter(
+      filename, output_encoding),
+                           output_encoding, created,
+      '<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 1.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">')
 
-def xml_elementtree_to_xml_file(tree, filename=None, output_encoding="ascii"):
-   assert iselement(tree)
-   ElementTree(tree).write(FileWriter(filename, output_encoding), output_encoding)
-
-def xml_file_to_xml_elementtree(file):
+def musicxml_file_to_musicxml_elementtree(file):
    tree = parse(file)
    return tree.getroot()
-
-def xml_elementtree_to_musicxml_elementtree(tree):
-   assert iselement(tree)
-   return tree
 
 def musicxml_elementtree_to_guido_tree(tree, warnings=False, verbose=False):
    assert iselement(tree)
    converter = MusicXMLToGuido((core, basic, advanced), warnings=warnings, verbose=verbose)
    return converter.convert(tree)
 
-inputs = ["guido_tree", "musicxml_elementtree", "xml_elementtree", "xml_file"]
+inputs = ["guido_tree", "musicxml_elementtree", "musicxml_file"]
 outputs = inputs
 

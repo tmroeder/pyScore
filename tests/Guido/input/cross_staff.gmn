@@ -4,18 +4,26 @@
    \composer<"Henri Duparc">
    \lyricist<"Charles Beaudelaire">
    \clef<"treble"> \key<+3> \meter<"9/8">
+ ],
+ [
    \staff<2>
    \clef<"treble"> \key<+3> \meter<"9/8">
+     \stemsUp
      \beamBegin \slurBegin e/24 g# c#2
    \staff<1>
+     \stemsDown
      b1 d2 b g# d b1 \slurEnd \beamEnd
    \staff<2>
+     \stemsUp
      \beamBegin \slurBegin e/24 g# c#2
    \staff<1>
+     \stemsDown
      b1 d2 b g# d b1 \slurEnd \beamEnd
    \staff<2>
+     \stemsUp
      \beamBegin \slurBegin e/24 g# c#2
    \staff<1>
+     \stemsDown
      b1 d2 b g# d b1 \slurEnd \beamEnd
  ]
 }

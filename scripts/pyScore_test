@@ -14,12 +14,12 @@ tests = [
     "Guido -> Guido",
     "This test exercises the Guido parser and grammar.  (MusicXML is uninvolved).  Some 'canonicalization' of the data is expected."),
    ("Guido", Format("Guido", "gmn", "guido_file"),
-    Format("MusicXML", "xml", "xml_file"),
+    Format("MusicXML", "xml", "musicxml_file"),
     "Guido -> MusicXML",
     "Converting all Guido Basic spec and some Guido Advanced spec to MusicXML."
    ),
    ("MusicXML",
-    Format("MusicXML", "xml", "xml_file"),
+    Format("MusicXML", "xml", "musicxml_file"),
     Format("Guido", "gmn", "guido_file"),
     "MusicXML -> Guido",
     "Preliminary support for converting MusicXML to Guido."

@@ -1,0 +1,7 @@
+% Created with pyScore 0.1 by Michael Droettboom <http://dkc.jhu.edu/~mdboom/pyScore>
+{[\meter<"3/4"> \key<0> \clef<"treble"> \beamBegin:1 \lyrics<"Oh_ say can you see, by the dawn's ear-ly light">( g1/8. e/16 \beamEnd:1 |
+ c/4 e g |
+ c2/2 e/8. d/16 |
+ c/4 e1 f# |
+ g/2 ) |
+]}

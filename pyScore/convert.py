@@ -51,7 +51,7 @@ class ConverterGraph:
          return [(self.inputs[input][output], input, output)]
       options = []
       for key, val in self.inputs[input].items():
-         if key not in tried:
+         if key not in tried and self.inputs.has_key(key):
             options.append(
                [(val, input, key)] +
                self.get_steps(key, output, tried + [input]))

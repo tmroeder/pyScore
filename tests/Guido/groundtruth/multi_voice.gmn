@@ -1,3 +1,4 @@
+% Created with pyScore 0.1 by Michael Droettboom <http://dkc.jhu.edu/~mdboom/pyScore>
 {[\title<"BWV 6.6"> \composer<"J. S. Bach"> \staff<1> \stemsUp \key<-2> \clef<"treble"> \meter<"c"> \bm( g1/8 a ) |
  b&/4 \bm( a/8 g ) f#/4 \bm( g/8 a ) |
  b&/4 a \fermata( g )],

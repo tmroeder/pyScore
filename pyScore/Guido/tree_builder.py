@@ -100,6 +100,8 @@ class GuidoTreeBuilder:
          new_tag = copy(tag)
          new_tag.mode = "End"
          new_tag.events = []
+         new_tag.args_list = []
+         new_tag.args_dict = {}
          self.add(new_tag)
       self.reset_collection(core.Sequence)
 
@@ -161,7 +163,7 @@ class GuidoTreeBuilder:
       """Adds an object to the current part."""
       self.current_collection.append(obj)
       for tag in self._active_tags:
-         obj.tags.setdefault(self.__class__.__name__, []).append(tag)
+         obj.tags.setdefault(tag.__class__.__name__, []).append(tag)
          if not isinstance(self.current_collection, core.Chord):
             tag.events.append(obj)
 

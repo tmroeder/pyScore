@@ -20,8 +20,10 @@ Currently, the only features are:
 - Extracting absolute times for Guido_ events
 - Guido_ to MusicXML_ conversion
 - MusicXML_ to Guido_ conversion
+- Obtaining rendered music images from the Guido_ Noteserver_.
 
-.. _Guido: http://www.noteserver.org/
+.. _Guido: http://www.salieri.org/guido/
+.. _Noteserver: http://www.noteserver.org/
 .. _MusicXML: http://www.musicxml.com/
 
 Download

@@ -78,7 +78,7 @@ class Format:
       self.converter = converter
 
 def convert(modules, input_format, output_format,
-            extra_args=None, callback=None):
+            extra_args=None, callback=None, extra_dict=[]):
    from pyScore.convert import ConverterGraph
    assert isinstance(input_format, Format)
    assert isinstance(output_format, Format)
@@ -97,9 +97,12 @@ def convert(modules, input_format, output_format,
          output = splitext(filename)[0] + "." + output_format.ext
       print "Converting '%s' to '%s'..." % (split(filename)[1], split(output)[1])
       sys.stdout.flush()
+      extras = {}
+      for x in extra_dict:
+         extras[x] = getattr(options, x)
       converter.run_steps(
          steps, filename, filename=output,
-         warnings=options.warnings, verbose=options.verbose)
+         warnings=options.warnings, verbose=options.verbose, **extras)
       if callback:
          callback(options, filename, output)
 
@@ -135,6 +138,29 @@ def document_file(stream, filename):
       url = noteserver.get_url(open(filename, "rU").read())
       stream.write(".. image:: %s\n\n" % url)
 
+def compare_files(out_file, gt_file):
+   test_list = open(out_file, "rU").readlines()
+   gt_list = open(gt_file, "rU").readlines()
+   comments = ("%", "<!")
+   i = 0
+   j = 0
+   while i < len(test_list) and j < len(gt_list):
+      a = test_list[i]
+      b = gt_list[j]
+      for comment in comments:
+         if a.startswith(comment):
+            i += 1
+         if b.startswith(comment):
+            j += 1
+      if i < len(test_list) and j < len(gt_list):
+         a = test_list[i]
+         b = gt_list[j]
+         if a.strip() != b.strip():
+            return False
+      i += 1
+      j += 1
+   return True
+
 def test(modules, test_dir, tests, groundtruth=False, callback=None):
    parser = OptionParser("\nusage: \%prog [--doc=documentation_dir] test_directory")
    
@@ -156,17 +182,22 @@ def test(modules, test_dir, tests, groundtruth=False, callback=None):
       if not isdir(doc_dir):
          print "Documentation directory '%s' does not exist." % doc_dir
       doc_fd = open(join(doc_dir, "tests.txt"), "wU")
-      doc_fd.write("Test results\n============\n\nTest results generated at %s\n\n.. contents::\n\n" % strftime("%H:%M %Z on %A, %B %d, %Y"))
+      doc_fd.write("Test results\n============\n\nTest results generated at %s\n\n" %
+                   strftime("%H:%M %Z on %A, %B %d, %Y"))
+      doc_fd.write("- (E): test caused an exception\n- (G): test does not match groundtruth\n- (U): no groundtruth provided\n\n")
+      doc_fd.write(".. contents::\n\n")
 
    from pyScore.convert import ConverterGraph
    converter = ConverterGraph(modules)
-   groundtruth_warnings = []
+   groundtruth_failures = []
+   groundtruth_not_available = []
    errors = []
    for dir, input_format, output_format, title, description in tests:
       root_dir, input_dir, output_dir, gt_dir = _get_test_directories(test_dir, dir, groundtruth)
       assert isinstance(input_format, Format)
       assert isinstance(output_format, Format)
       steps = converter.get_steps(input_format.converter, output_format.converter)
+      
       if make_documentation:
          doc_fd.write(title)
          doc_fd.write("\n")
@@ -178,48 +209,44 @@ def test(modules, test_dir, tests, groundtruth=False, callback=None):
       files.sort()
       for filename in files:
          root_filename = splitext(split(filename)[1])[0]
-         if make_documentation:
-            doc_fd.write(root_filename)
-            doc_fd.write("\n")
-            doc_fd.write("'" * len(root_filename))
-            document_file(doc_fd, filename)
+         documentation_header = root_filename
          out_file = join(output_dir, root_filename + "." + output_format.ext)
          print "Converting '%s' to '%s'..." % (split(filename)[1], split(out_file)[1])
          sys.stdout.flush()
          try:
             converter.run_steps(steps, filename, filename=out_file, warnings=True, verbose=True)
-            if make_documentation:
-               document_file(doc_fd, out_file)
          except Exception, e:
             errors.append("Exception from '%s':\n\n" % filename)
             errors.extend(traceback.format_exception(*sys.exc_info()))
             errors.append("\n")
-            if make_documentation:
-               document_lines(doc_fd, "Conversion caused an exception::\n\n",
-                              traceback.format_exception(*sys.exc_info()))
+            documentation_header += " (E)"
          else:
             if callback:
                callback(filename, out_file)
             if groundtruth:
                gt_file = join(gt_dir, root_filename + "." + output_format.ext)
                if isfile(gt_file):
-                  test_list = open(out_file, "rU").readlines()
-                  gt_list = open(gt_file, "rU").readlines()
-                  for a, b in zip(test_list, gt_list):
-                     if a.strip() != b.strip():
-                        groundtruth_warnings.append(out_file)
-                        if make_documentation:
-                           doc_fd.write("\n\n**Output does not match the groundtruth.**\n\n")
-                        break
+                  if not compare_files(out_file, gt_file):
+                        groundtruth_failures.append(out_file)
+                        documentation_header += " (G)"
                else:
-                  if make_documentation:
-                     doc_fd.write("\n\n**Output has no groundtruth to verify against.**\n\n")
-                  
+                  groundtruth_not_available.append(out_file)
+                  documentation_header += " (U)"
+         if make_documentation:
+            doc_fd.write(documentation_header)
+            doc_fd.write("\n")
+            doc_fd.write("'" * len(documentation_header))
+            document_file(doc_fd, filename)
+            if documentation_header.find("(E)") == -1:
+               document_file(doc_fd, out_file)
 
    if len(errors):
       print textwrap.fill("ERROR: The following files caused exceptions during conversion:")
       print "".join(errors)
-   if len(groundtruth_warnings):
+   if len(groundtruth_not_available):
+      print textwrap.fill("WARNING: The following files do not have groundtruth available:")
+      print textwrap.fill(", ".join(groundtruth_not_available))
+   if len(groundtruth_failures):
       print textwrap.fill("WARNING: The following files failed the groundtruth check:")
-      print textwrap.fill(", ".join(groundtruth_warnings))
+      print textwrap.fill(", ".join(groundtruth_failures))
       

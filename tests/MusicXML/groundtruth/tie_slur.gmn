@@ -1,10 +1,9 @@
-{[_/2 \tieBegin:2 f1 |
+% Created with pyScore 0.1 by Michael Droettboom <http://dkc.jhu.edu/~mdboom/pyScore>
+{[\staff<1> _/2 \tieBegin:2 f1 |
  f \tieEnd:2 _ |
  \slurBegin:1 c/4 d \slurEnd:1 \slurBegin:1 e f \slurEnd:1 \slurBegin:1 g a \slurBegin:2 b a \slurEnd:2 g f \slurEnd:1 |
- |
 ],
-[\tieBegin:1 d1/1 |
+[\staff<1> \tieBegin:1 d1/1 |
  d \tieEnd:1 |
- |
  |
 ]}

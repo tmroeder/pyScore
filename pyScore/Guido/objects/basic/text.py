@@ -23,12 +23,12 @@ from pyScore.Guido.objects.core import TAG
 class TEXT(TAG):
     def __init__(self, name, id, args_list, args_dict, *args, **kwargs):
        TAG.__init__(self, name, id, args_list, args_dict, *args, **kwargs)
-       if len(args_list) < 1 and not args_dict.has_key("name"):
-          self.raise_error("Invalid arguments for \\%s" % name)
        if len(args_list):
            self.text = args_list[0]
-       if args_dict.has_key("name"):
+       elif args_dict.has_key("name"):
            self.text = args_dict['name']
+       else:
+           self.text = ""
 
 class text(TEXT):
     pass

@@ -13,7 +13,7 @@ def callback(options, input_file, output_file):
 
 convert(
    [pyScore.Guido.convert, pyScore.MusicXML.convert],
-   Format("MusicXML", "xml", "xml_file"),
+   Format("MusicXML", "xml", "musicxml_file"),
    Format("Guido", "gmn", "guido_file"),
    extra_args=[(("-d", "--dtd"), {'action': 'store_true', 'dest': 'dtd', 'help': 'Validate against the MusicXML DTD'})],
    callback=callback)

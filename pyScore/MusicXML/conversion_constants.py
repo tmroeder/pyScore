@@ -39,6 +39,18 @@ g2m_duration_type = [
    (Rat(1,1), 'whole'),
    (Rat(2,1), 'breve')
    ]
+m2g_duration_type = {
+   '256th': Rat(1, 256),
+   '128th': Rat(1, 128),
+   '64th': Rat(1, 64),
+   '32nd': Rat(1, 32),
+   '16th': Rat(1, 16),
+   'eighth': Rat(1, 8),
+   'quarter': Rat(1, 4),
+   'half': Rat(1, 2),
+   'whole': Rat(1, 1),
+   'breve': Rat(2, 1)
+   }
 g2m_clef_type = {
    'g': 'G',
    'f': 'F',
@@ -85,3 +97,13 @@ m2g_key = {
 m2g_octave_shift = {
    'up': '+',
    'down': '-'}
+m2g_words = {
+   'accel': 'accelerando',
+   'accelerando': 'accelerando',
+   'ritardando': 'ritardando',
+   'ritard': 'ritardando',
+   'rit': 'ritardando',
+   'crescendo': 'crescendo',
+   'cresc': 'crescendo',
+   'diminuendo': 'diminuendo',
+   'dim': 'diminuendo' }

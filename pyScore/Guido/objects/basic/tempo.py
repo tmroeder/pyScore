@@ -36,14 +36,18 @@ class TEMPO:
     
     def __init__(self, name, id, args_list, args_dict, *args, **kwargs):
         TAG.__init__(self, name, id, args_list, args_dict, *args, **kwargs)
-        self.ramp_to = False
+        self.tempo_name = None
         if len(args_list) == 1:
-            self.ramp_to = True
-            self.tempo_name = args_list[0]
-            if self.tempi.has_key(self.tempo_name.lower()):
-                self.parse_tempo(self.tempi[self.tempo_name.lower()])
+            arg = args_list[0].lower()
+            if self.tempi.has_key(arg):
+                self.tempo_name = args_list[0]
+                self.parse_tempo(self.tempi[arg])
+            else:
+                try:
+                    self.parse_tempo(arg)
+                except:
+                    self.raise_error("I don't know how fast '%s' is.  Please specify a second argument of the form '1/4=120'." % (arg))
         elif len(args_list) == 2:
-            self.ramp_to = True
             self.tempo_name = args_list[0]
             self.parse_tempo(args_list[1])
 
