@@ -94,8 +94,6 @@ the Guido stream, such as stem direction..."""
    def make_plan(self, score):
       # NOTE: In GUIDO, barlines are "global": i.e. they affect all parts.  Therefore, we merge all barlines, but warn if there are barlines in subsequent parts that do not match those in the previous parts.
 
-      # NOTE: Cross-staff beaming doesn't seem to convert from Guido to MusicXML
-      
       # First we scan through all of the parts and sort by staff, and
       # keep track of where the barlines are
 
@@ -170,7 +168,7 @@ the Guido stream, such as stem direction..."""
             part_no += 1
 
    def make_parts(self, score_partwise, staff_layout, barlines):
-      # NOTE: Measures out-of-order (using arguments to the \\beam tag) in Guido are treated as in-order
+      # NOTE: Measures out-of-order (using arguments to the \\bar tag) in Guido are treated as being in file ordering
       used_sequences = []
       part_no = 1
       for i, group in enumerate(staff_layout):
