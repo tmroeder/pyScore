@@ -27,7 +27,7 @@ g2m_accidental = {
    '&&': 'double-flat',
    '&': 'flat',
    '#': 'sharp',
-   '##': 'sharp'}
+   '##': 'double-sharp'}
 g2m_duration_type = [
    (Rat(1,256), '256th'),
    (Rat(1,128), '128th'),
