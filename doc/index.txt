@@ -56,7 +56,8 @@ Download
 
 You can also `browse the CVS`__.
 
-.. __: http://dkc.jhu.edu/cgi-bin/cvsweb.cgi/pyScore/
+.. __: http://cvs.sourceforge.net/viewcvs.py/pyscore/
+
 
 Release Notes
 =============
