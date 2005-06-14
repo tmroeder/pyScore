@@ -95,9 +95,9 @@ class ConverterGraph:
             file.write('"%s" -> "%s";\n' % (input.replace("_", " "), output.replace("_", " ")))
       file.write("}\n")
 
-def convert(input_format, output_format, input, stream=sys.stdout, progress_callback=dummy_function, **kwargs):
+def convert(modules, input_format, output_format, input, stream=sys.stdout, progress_callback=dummy_function, **kwargs):
    converter = ConverterGraph(modules)
-   steps = converter.get_steps(input_format.convertor, output_format.convertor)
-   return converter.run_steps(input, stream=stream, **kwargs)
+   steps = converter.get_steps(input_format, output_format)
+   return converter.run_steps(steps, input, stream=stream, progress_callback=progress_callback, **kwargs)
 
 __all__ = "ConverterGraph convert".split()

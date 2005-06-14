@@ -52,14 +52,15 @@ on-disk files.  Everything else is an in-memory data structure.
 Download
 ========
 
-- `pyScore-0.4.0.tar.bz2 <pyScore-0.4.0.tar.bz2>`_ (148056 bytes)
-- `pyScore-0.4.0.tar.gz <pyScore-0.4.0.tar.gz>`_ (182194 bytes)
-- `pyScore-0.4.0.zip <pyScore-0.4.0.zip>`_ (287579 bytes)
+- `pyScore-0.4.0.tar.bz2 <pyScore-0.4.0.tar.bz2>`_ (147972 bytes)
+- `pyScore-0.4.0.tar.gz <pyScore-0.4.0.tar.gz>`_ (182179 bytes)
+- `pyScore-0.4.0.zip <pyScore-0.4.0.zip>`_ (287560 bytes)
 
 
 You can also `browse the CVS`__.
 
-.. __: http://dkc.jhu.edu/cgi-bin/cvsweb.cgi/pyScore/
+.. __: http://cvs.sourceforge.net/viewcvs.py/pyscore/
+
 
 Release Notes
 =============
@@ -220,7 +221,7 @@ writing pyScore would have been much more difficult:
 
 .. __: http://www.musicxml.com/
 
-- ElementTree__ (for XML processing with a subset of XPath) by Frederich Lundh
+- ElementTree__ (for XML processing with a subset of XPath) by Frederik Lundh
 
 .. __: http://effbot.org/zone/element-index.htm
 

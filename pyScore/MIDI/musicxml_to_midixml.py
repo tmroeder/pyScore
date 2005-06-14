@@ -27,9 +27,9 @@ from pyScore.util.range_checking import *
 
 from math import log
 try:
-    import textwrap
+   import textwrap
 except ImportError:
-    from pyScore.util.backport import textwrap
+   from pyScore.util.backport import textwrap
 
 config.add_option("", "--divisions", action="store", default=DIVISIONS, type="int")
 config.add_option("", "--ticks-per-beat", type="int", default=TICKS_PER_BEAT,
@@ -109,11 +109,46 @@ class MusicXMLToMidiXML:
       SubElement(midi, "TrackCount").text = str(num_tracks + 1)
       SubElement(midi, "TicksPerBeat").text = str(state.ticks_per_beat)
       SubElement(midi, "TimestampType").text = "Absolute"
+      self.get_measure_lengths(music_xml, state)
       self.make_tracks(music_xml, midi, state)
       if self._warnings:
          for warning in state.warnings:
             print textwrap.fill("WARNING: " + warning)
       return midi
+
+   def get_measure_lengths(self, music_xml, state):
+      measure_lengths = {}
+      for part in music_xml.findall("./part"):
+         time_spine = 0
+         duration = 0
+         for measure in part:
+            measure_no = measure.attrib["number"]
+            measure_lengths.setdefault(measure_no, 0)
+            for element in measure:
+               if element.find("./chord") is None:
+                  time_spine += duration
+
+               if element.tag == "attributes":
+                  state.divisions = element.findtext("./divisions") or state.divisions
+
+               duration = int(element.findtext("./duration") or "0")
+               if duration != None:
+                  duration = self.convert_duration(duration, state.divisions)
+               
+               if element.tag == "backup":
+                  time_spine -= duration
+                  duration = 0
+               elif element.tag == "forward":
+                  time_spine += duration
+                  duration = 0
+               else:
+                  measure_lengths[measure_no] = max(measure_lengths.get(measure_no, 0), time_spine + duration)
+               measure_lengths[measure_no] = max(measure_lengths.get(measure_no, 0), time_spine)
+
+            time_spine += duration
+            duration = 0
+            measure_lengths[measure_no] = max(measure_lengths.get(measure_no, 0), time_spine)
+      state.measure_lengths = measure_lengths
 
    def make_tracks(self, music_xml, midi, state):
       state.part_no = 0
@@ -150,6 +185,7 @@ class MusicXMLToMidiXML:
       # from accumulating as durations are summed together, particularly since you
       # have to use such low numbers for TicksPerBeat in the MIDI spec.
       for measure in part:
+         measure_no = measure.attrib["number"]
          for element in measure:
             if element.find("./chord") is None:
                time_spine += duration
@@ -169,6 +205,8 @@ class MusicXMLToMidiXML:
                duration = 0
             else:
                self.dispatch_element(element, time_spine, events, meta_events, state)
+         time_spine = state.measure_lengths[measure_no]
+         duration = 0
 
       if element.find("./chord") is None:
          time_spine += duration

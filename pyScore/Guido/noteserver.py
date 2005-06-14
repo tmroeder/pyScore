@@ -20,7 +20,7 @@ Copyright (C) 2002 Michael Droettboom
 
 from urllib import urlencode, urlopen
 
-NOTESERVER = "http://tempo.iti.informatik.tu-darmstadt.de/scripts/salieri/gifserv.pl"
+NOTESERVER = "http://clef.cs.ubc.ca/scripts/salieri/gifserv.pl"
 
 def get_url_args(gmn_string, width="16.0cm", height="12.0cm", zoom=0.5, **kwargs):
    """Get the CGI arguments to send to the GUIDO noteserver"""

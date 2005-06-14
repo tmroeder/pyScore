@@ -18,7 +18,7 @@ Copyright (C) 2002 Michael Droettboom
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 TICKS_PER_BEAT = 24
-DIVISIONS = 288
+DIVISIONS = 8960
 
 pitch_names_to_semitones = {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7,
                             'A': 9, 'B': 11}

@@ -27,6 +27,7 @@ except ImportError:
 
 from os.path import isfile, expanduser, split, join
 from sys import platform
+import sys
 
 class ConfigOptionParser(OptionParser):
    default_options = []
@@ -35,6 +36,7 @@ class ConfigOptionParser(OptionParser):
       OptionParser.__init__(self, *args, **kwargs)
       self.add_options(self.default_options)
       self._cache = None
+      self._disabled = False
 
    def add_option(self, *args, **kwargs):
       try:
@@ -49,9 +51,16 @@ class ConfigOptionParser(OptionParser):
    def get_config_files(self):
       return []
 
+   def disable(self):
+      self._disabled = True
+
    def parse_args(self):
+      if self._disabled:
+         args = []
+      else:
+         args = sys.argv[1:]
       if self._cache is None:
-         options, args = OptionParser.parse_args(self)
+         options, args = OptionParser.parse_args(self, args)
          files = self.get_config_files()
          config_parser = ConfigParser.RawConfigParser()
          config_parser.read(files)
