@@ -12,7 +12,7 @@ Copyright (C) 2004 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -122,7 +122,7 @@ class test:
          doc_dir = options.doc
          if not isdir(doc_dir):
             print "Documentation directory '%s' does not exist." % doc_dir
-         self.doc_fd = open(join(doc_dir, "tests.txt"), "wU")
+         self.doc_fd = open(join(doc_dir, "tests.txt"), "w")
          self.doc_header()
 
       converter = ConverterGraph(modules)
@@ -218,7 +218,7 @@ class test:
       self.doc_file(doc_fd, filename)
       if documentation_header.find("(E)") == -1:
          self.doc_file(doc_fd, out_file)
-         
+
    def doc_file(self, stream, filename):
       if filename.endswith("gmn"):
          self.doc_lines(stream, filename, open(filename, "rU").readlines())
@@ -259,5 +259,5 @@ class test:
          i += 1
          j += 1
       return True
-      
+
 __all__ = "test convert Format".split()

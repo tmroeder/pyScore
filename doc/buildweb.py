@@ -14,7 +14,7 @@ Copyright (C) 2004 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -67,25 +67,29 @@ filled_in = source % parts
 if not isfile(README) or filled_in != open(README, "r").read():
    open(README, "w").write(filled_in)
 
+settings={'stylesheet_path': "default.css", 'stylesheet': None,
+          'embed_stylesheet': 0}
+
 print "Generating main documentation page..."
 fd = StringIO(filled_in)
-publish_file(source=fd, destination=open(join(DIST_DIR, "index.html"), "w"), writer_name="html")
+publish_file(source=fd, destination=open(join(DIST_DIR, "index.html"), "w"),
+             writer_name="html", settings_overrides=settings)
 
 print "Generating test results page..."
 if isfile("tests.txt"):
    publish_file(source=open("tests.txt", "rU"),
                 destination=open(join(DIST_DIR, "tests.html"), "w"),
-                writer_name="html")
+                writer_name="html", settings_overrides=settings)
 
-## print "Generating graph..."
-## import pyScore.MusicXML.convert
-## import pyScore.Guido.convert
-## import pyScore.MIDI.convert
-## from pyScore.convert import *
+print "Generating graph..."
+import pyScore.MusicXML.convert
+import pyScore.Guido.convert
+import pyScore.MIDI.convert
+from pyScore.convert import *
 
-## graph = ConverterGraph([pyScore.MusicXML.convert,
-##                         pyScore.Guido.convert,
-##                         pyScore.MIDI.convert])
-## graph.make_dot_file(open("pyScore_graph.dot", "w"))
+graph = ConverterGraph([pyScore.MusicXML.convert,
+                        pyScore.Guido.convert,
+                        pyScore.MIDI.convert])
+graph.make_dot_file(open("pyScore_graph.dot", "w"))
 
 open(join(DIST_DIR, "default.css"), "w").write(open("default.css", "r").read())

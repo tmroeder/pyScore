@@ -52,9 +52,7 @@ on-disk files.  Everything else is an in-memory data structure.
 Download
 ========
 
-- `pyScore-0.4.0.tar.bz2 <pyScore-0.4.0.tar.bz2>`_ (147972 bytes)
-- `pyScore-0.4.0.tar.gz <pyScore-0.4.0.tar.gz>`_ (182179 bytes)
-- `pyScore-0.4.0.zip <pyScore-0.4.0.zip>`_ (287560 bytes)
+- `pyScore-0.4.0.tar.gz <pyScore-0.4.0.tar.gz>`_ (183152 bytes)
 
 
 You can also `browse the CVS`__.
@@ -74,13 +72,15 @@ Notes
 
 - arguments to Guido beams are ignored [beam_stem.py]
 
-- Only type 1 MIDI files are supported at this time [midixml_to_midi.py]
+- Only the first verse of lyrics in MusicXML can be stored in Guido [musicxml_to_guido.py]
 
-- MidiXML <EndOfTrack> elements are ignored [midixml_to_midi.py]
+- There is no way to represent <senza-misura> and type="single-number" for meters in Guido [musicxml_to_guido.py]
 
-- MidiXML <MTCQuarterFrame> elements are ignored [midixml_to_midi.py]
+- Tempo names are not converted from MusicXML -> Guido, only metronome markings [musicxml_to_guido.py]
 
-- Lyric syllables from MusicXML -> MidiXML are pretty weak for obvious reasons [musicxml_to_midixml.py]
+- There is a limited vocabulary of written directions that get converted from MusicXML to Guido.  This conversion is not very smart or robust. [musicxml_to_guido.py]
+
+- Markings followed by dashes are not supported by MusicXML -> Guido [musicxml_to_guido.py]
 
 - MusicXML doesn't seem to have a way to support Guido \\headsReverse [guido_to_musicxml.py]
 
@@ -96,15 +96,13 @@ Notes
 
 - accelerandos/ritardandos are output to MusicXML as text only (i.e. no actual tempo changes) [guido_to_musicxml.py]
 
-- Only the first verse of lyrics in MusicXML can be stored in Guido [musicxml_to_guido.py]
+- Lyric syllables from MusicXML -> MidiXML are pretty weak for obvious reasons [musicxml_to_midixml.py]
 
-- There is no way to represent <senza-misura> and type="single-number" for meters in Guido [musicxml_to_guido.py]
+- Only type 1 MIDI files are supported at this time [midixml_to_midi.py]
 
-- Tempo names are not converted from MusicXML -> Guido, only metronome markings [musicxml_to_guido.py]
+- MidiXML <EndOfTrack> elements are ignored [midixml_to_midi.py]
 
-- There is a limited vocabulary of written directions that get converted from MusicXML to Guido.  This conversion is not very smart or robust. [musicxml_to_guido.py]
-
-- Markings followed by dashes are not supported by MusicXML -> Guido [musicxml_to_guido.py]
+- MidiXML <MTCQuarterFrame> elements are ignored [midixml_to_midi.py]
 
 Bugs or shortcomings in other systems
 -------------------------------------
@@ -136,28 +134,28 @@ Bugs or shortcomings in other systems
 To-dos
 ------
 
-- check that we have ``xmllint`` and use it [validate.py]
-
-- document GuidoToMusicXML.make_plan because it's really hairy [guido_to_musicxml.py]
-
-- support word-based (as opposed to wedge-based) *cresc.* and *dim.* [guido_to_musicxml.py]
-
 - deal with time-wise MusicXML scores (e.g. use Michael Good's XSLT transform first) [musicxml_to_guido.py]
 
 - MusicXML -> Guido ornament handling [musicxml_to_guido.py]
 
 - check that we have ``xmllint`` and use it [validate.py]
 
+- document GuidoToMusicXML.make_plan because it's really hairy [guido_to_musicxml.py]
+
+- support word-based (as opposed to wedge-based) *cresc.* and *dim.* [guido_to_musicxml.py]
+
 - add support for custom namespace resolvers/default namespaces [ElementTree.py]
 
 - add support for incremental parsing [ElementTree.py]
 
+- check that we have ``xmllint`` and use it [validate.py]
+
 Longer-term plans
 -----------------
 
-- Possibly switch to another XML toolkit to support transformation and validation directly from Python [validate.py]
-
 - Finish support for conversion from MusicXML to Guido [musicxml_to_guido.py]
+
+- Possibly switch to another XML toolkit to support transformation and validation directly from Python [validate.py]
 
 
 
