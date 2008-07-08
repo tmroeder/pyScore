@@ -2,7 +2,7 @@
 Code to convert from pyGUIDO objects to MusicXML
 Python GUIDO tools
 
-Copyright (C) 2002 Michael Droettboom
+Copyright (c) 2002-2008 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -13,7 +13,7 @@ Copyright (C) 2002 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -54,7 +54,7 @@ that help with the re-ordering into MusicXML order."""
 class GuidoToMusicXML:
    """This class handles conversion from a Guido object tree to a MusicXML
 elementtree."""
-   
+
    class State:
       """The state object stores state of various flags that can be changed in
 the Guido stream, such as stem direction..."""
@@ -157,7 +157,7 @@ the Guido stream, such as stem direction..."""
          print "Grouping sequences into parts:"
          print [[[x.number for x in y] for y in z] for z in staff_layout]
       return staff_layout, barlines.data
-   
+
    def make_part_list(self, score_partwise, staff_layout):
       part_list = SubElement(score_partwise, "part-list")
       part_no = 1
@@ -343,7 +343,7 @@ the Guido stream, such as stem direction..."""
             element = SubElement(note, "tie", type=t)
             result.append(Element("tied", type=t, number=str(number)))
       return result
-               
+
    def find_root_duration(self, item):
       float_dur = float(item.num) / float(item.den)
       if float_dur > 2.0 or float_dur < 0.00390625: # 1/256
@@ -510,7 +510,7 @@ the Guido stream, such as stem direction..."""
       return None
 
    # barline tags
-   
+
    def tag_doubleBar(self, tag, measure, direction, state):
       if len(measure) > 1:
          barline = SubElement(measure, 'barline', location="left")
@@ -562,7 +562,7 @@ the Guido stream, such as stem direction..."""
    def tag_crescendo(self, tag, measure, direction, state):
       # TODO: support word-based (as opposed to wedge-based) *cresc.* and *dim.*
       pass
-      
+
    def tag_crescendoBegin(self, tag, measure, direction, state):
       name = tag.__class__.__name__
       direction_type = SubElement(direction, "direction-type")
@@ -581,7 +581,7 @@ the Guido stream, such as stem direction..."""
          barline = SubElement(measure, 'barline')
          SubElement(barline, 'bar-style').text = 'none'
          SubElement(barline, 'fermata')
-         
+
    # key tags
 
    def tag_key(self, tag, measure, direction, state):
@@ -591,9 +591,9 @@ the Guido stream, such as stem direction..."""
       SubElement(key, "mode").text = tag.key_mode
 
    # layout tags
-   
+
    # EXT: System breaks don't work in Turandot.
-   
+
    def tag_newSystem(self, tag, measure, direction, state):
       SubElement(measure, "print", {'new-system': 'yes'})
 
@@ -608,7 +608,7 @@ the Guido stream, such as stem direction..."""
       time = SubElement(attributes, "time", symbol=symbol)
       SubElement(time, "beats").text = str(tag.num)
       SubElement(time, "beat-type").text = str(tag.den)
-      
+
    # repeat tags
 
    def tag_repeatBegin(self, tag, measure, direction, state):
@@ -659,7 +659,7 @@ the Guido stream, such as stem direction..."""
                          tempo = str(int((tag.bpm * 4 * tag.num) / tag.den)))
 
    # NOTE: accelerandos/ritardandos are output to MusicXML as text only (i.e. no actual tempo changes)
-   
+
    def tag_accelerando(self, tag, measure, direction, state):
       name = tag.name
       if len(name) > 5:
@@ -717,10 +717,10 @@ the Guido stream, such as stem direction..."""
       SubElement(direction_type, "octave-shift",
                  type = g2m_octave_types[cmp(tag.octaves, 0)],
                  size = str(1 + 7 * abs(tag.octaves)))
-      
+
    def tag_octaveEnd(self, tag, measure, direction, state):
       direction_type = SubElement(direction, "direction-type")
       SubElement(direction_type, "octave-shift",
                  type = "stop")
-      
- 
+
+

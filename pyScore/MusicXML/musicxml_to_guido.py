@@ -2,7 +2,7 @@
 Code to convert from MusicXML to GUIDO
 Python GUIDO tools
 
-Copyright (C) 2004 Michael Droettboom
+Copyright (c) 2002-2008 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -13,7 +13,7 @@ Copyright (C) 2004 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -348,13 +348,13 @@ class MusicXMLToGuido:
 
    def begin_fermata_callback(self, element, builder):
       builder.add_Tag("fermata", None, (), mode="Begin", use_parens=True)
-   
+
    def end_fermata_callback(self, element, builder):
       builder.add_Tag("fermata", None, (), mode="End", use_parens=True)
 
    def begin_fingering_callback(self, element, builder):
       builder.add_Tag("fingering", None, (element.text,), mode="Begin", use_parens=True)
-   
+
    def end_fingering_callback(self, element, builder):
       builder.add_Tag("fingering", None, (), mode="End", use_parens=True)
 
@@ -441,7 +441,7 @@ class MusicXMLToGuido:
    def element_dynamics(self, element, builder, state):
       for subelement in element:
          builder.add_Tag("intens", None, (subelement.tag,))
-      
+
    def element_wedge(self, element, builder, state):
       type = element.get("type")
       number = int(element.get("number", "1"))
@@ -457,7 +457,7 @@ class MusicXMLToGuido:
       direction = element.get('type', 'up')
       octave = m2g_octave_shift[direction] + str((abs(size) - 1) / 7)
       builder.add_Tag('oct', None, (octave,))
-      
+
    def element_metronome(self, element, builder, state):
       # NOTE: Tempo names are not converted from MusicXML -> Guido, only metronome markings
       beat_unit = m2g_duration_type[element.findtext("./beat-unit")]

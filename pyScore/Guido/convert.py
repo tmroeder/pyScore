@@ -2,7 +2,7 @@
 Code to convert from Guido to Guido etc.
 Python GUIDO tools
 
-Copyright (C) 2002 Michael Droettboom
+Copyright (c) 2002-2008 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -13,7 +13,7 @@ Copyright (C) 2002 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -60,7 +60,7 @@ def Guido_tree_to_Guido_file(score, filename=None):
    score.write_guido(output)
 
 def Guido_string_to_Guido_image(gmn_string, filename=None):
-   save_gif(gmn_string, filename, config.get("width"), config.get("height"), config.get("zoom"))
+   save_gif(gmn_string, filename, width=config.get("width"), height=config.get("height"), zoom=config.get("zoom"))
 
 inputs = ["Guido_file", "Guido_string", "Guido_tree"]
 outputs = ["Guido_file", "Guido_string", "Guido_tree", "Guido_image"]

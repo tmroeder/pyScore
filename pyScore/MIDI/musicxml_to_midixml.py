@@ -2,7 +2,7 @@
 Code to convert from MusicXML to MidiXML
 Python GUIDO tools
 
-Copyright (C) 2004 Michael Droettboom
+Copyright (c) 2002-2008 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -13,7 +13,7 @@ Copyright (C) 2004 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -95,7 +95,7 @@ class MusicXMLToMidiXML:
 
    ########################################
    # Top-level methods
-      
+
    def convert(self, music_xml):
       state = self.State()
       state.ticks_per_beat = self._ticks_per_beat
@@ -134,7 +134,7 @@ class MusicXMLToMidiXML:
                duration = int(element.findtext("./duration") or "0")
                if duration != None:
                   duration = self.convert_duration(duration, state.divisions)
-               
+
                if element.tag == "backup":
                   time_spine -= duration
                   duration = 0
@@ -175,7 +175,7 @@ class MusicXMLToMidiXML:
          events = []
       else:
          events = meta_events
-      state.channel = state.part_no 
+      state.channel = state.part_no
       state.dynamics = 64
       for element in score_part:
          self.dispatch_element(element, time_spine, events, meta_events, state)
@@ -196,7 +196,7 @@ class MusicXMLToMidiXML:
             duration = int(element.findtext("./duration") or "0")
             if duration != None:
                duration = self.convert_duration(duration, state.divisions)
-               
+
             if element.tag == "backup":
                time_spine -= duration
                duration = 0
@@ -253,7 +253,7 @@ class MusicXMLToMidiXML:
 
    element_part_name = Text("TrackName")
    element_instrument_name = Text("InstrumentName")
-      
+
    def element_midi_instrument(self, midi_inst, time_spine, events, meta_events, state):
       state.channel = midi_inst.findtext("./midi-channel") or state.channel
       name = midi_inst.findtext("./midi-name")
@@ -292,7 +292,7 @@ class MusicXMLToMidiXML:
                            Note = str(midi_number),
                            Velocity = str(state.dynamics))
          events.append(make_event(note_on, time_spine, state.ticks_per_beat))
-         
+
          note_off = Element("NoteOff",
                             Channel = str(state.channel),
                             Note = str(midi_number),
@@ -311,7 +311,7 @@ class MusicXMLToMidiXML:
       output = Element("Lyric")
       output.text = syllable
       events.append(make_event(output, time_spine, state.ticks_per_beat))
-            
+
    def element_sound(self, sound, time_spine, events, meta_events, state):
       tempo = sound.get("tempo")
       if tempo != None:
@@ -349,5 +349,5 @@ class MusicXMLToMidiXML:
                          MIDIClocksPerMetronomeClick = str(clocks_per_tick),
                          ThirtySecondsPer24Clocks = str(thirty_seconds))
       meta_events.append(make_event(time_sig, time_spine, state.ticks_per_beat))
-         
+
 __all__ = ["MusicXMLToMidiXML"]

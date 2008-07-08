@@ -2,7 +2,7 @@
 Core GUIDO objects
 Python GUIDO tools
 
-Copyright (C) 2004 Michael Droettboom
+Copyright (c) 2002-2008 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -13,7 +13,7 @@ Copyright (C) 2004 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -85,7 +85,7 @@ class GUIDO_OBJECT(object):
 
     def get_tag(self, tag_name):
         return self.tags.get(tag_name, {})
-           
+
     def raise_error(self, message):
         if self.pos == None:
             raise GuidoError("%s\n%s\n" % (repr(self), textwrap.fill(message)))
@@ -96,11 +96,11 @@ class GUIDO_OBJECT(object):
 
     def set_duration(self, num, den, dotting=0):
         pass
-                
+
 class COLLECTION(GUIDO_OBJECT):
     separator = ' '
     parens = '[]'
-    
+
     def __init__(self, *args, **kwargs):
         GUIDO_OBJECT.__init__(self, *args, **kwargs)
         self.collection = []
@@ -170,7 +170,7 @@ class DURATIONAL(GUIDO_OBJECT):
     standard_durations = SortedListSet([2.0] + [1.0 / pow(2, x) for x in range(8)])
     one_dot_durations = SortedListSet([x * one_dot for x in standard_durations])
     two_dot_durations = SortedListSet([x * two_dots for x in standard_durations])
-    
+
     def __init__(self, num, den=None, dotting=None, *args, **kwargs):
         GUIDO_OBJECT.__init__(self, *args, **kwargs)
         self.set_duration(num, den, dotting)
@@ -243,7 +243,7 @@ class DURATIONAL(GUIDO_OBJECT):
     def _set_den(self, den):
         self._den = den
     den = property(_get_den, _set_den)
-        
+
     def _get_dotting(self):
         return self._dotting
     def _set_dotting(self, dotting):
@@ -269,7 +269,7 @@ class PITCHED(GUIDO_OBJECT):
         'la': 'a', 'ti': 'b', 'si': 'b' }
     for name in normal_pitch_names:
         pitch_names_to_normal_pitch_names[name] = name
-    
+
     accidentals = ['&&', '&', '#', '##', 'is', '']
     accidentals_to_semitones = {'&&': -2, '&': -1, '#': 1, 'is': 1,
                                 '##': 2, '': 0}
@@ -393,7 +393,7 @@ class TAG(GUIDO_OBJECT):
     default = 0
     parens = '()'
     separator = ' '
-    
+
     def __init__(self, name_, id_, args_list, args_dict, *args, **kwargs):
         self.name = name_
         self.id = id_
@@ -463,7 +463,7 @@ class TAG(GUIDO_OBJECT):
                         return True
                 return False
         return False
-                            
+
     def is_last(self, note):
         for i in range(len(self.events)-1, -1, -1):
             n = self.events[i]
@@ -479,7 +479,7 @@ class TAG(GUIDO_OBJECT):
 
 class DEFAULT_TAG(TAG):
     pass
-    
+
 ########################################
 # Concrete collections
 
@@ -517,7 +517,7 @@ class Chord(INLINE_COLLECTION, DURATIONAL):
 
 class Barline(GUIDO_OBJECT):
     measure = None
-    
+
     def __repr__(self):
         return "<Barline>"
 

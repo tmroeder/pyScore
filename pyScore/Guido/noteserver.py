@@ -2,7 +2,7 @@
 Tools for interacting with the Guido NoteServer
 Python GUIDO tools
 
-Copyright (C) 2002 Michael Droettboom
+Copyright (c) 2002-2008 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -13,7 +13,7 @@ Copyright (C) 2002 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -29,7 +29,7 @@ def get_url_args(gmn_string, width="16.0cm", height="12.0cm", zoom=0.5, **kwargs
                      'zoom': str(zoom),
                      'mode': 'gif',
                      'gmndata': gmn_string.encode("latin_1")})
-   
+
 def get_url(gmn_string, server=NOTESERVER, **kwargs):
    """Get the URL to get a rendering of the given GMN string from the Guido Noteserver.
 An alternate Noteserver can be specified with the server argument."""
@@ -44,4 +44,4 @@ def save_gif(gmn_string, filename, **kwargs):
    """Saves a rendering of the given GMN string from the Guido Noteserver to the given filename.
 An alternate Noteserver can be specified with the server argument."""
    open(filename, "wb").write(get_gif_handle(gmn_string, **kwargs).read())
-   
+

@@ -2,7 +2,7 @@
 Code to convert from MidiXML to MIDI
 Python GUIDO tools
 
-Copyright (C) 2004 Michael Droettboom
+Copyright (c) 2002-2008 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -13,12 +13,12 @@ Copyright (C) 2004 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from pyScore.config import config 
+from pyScore.config import config
 from pyScore.MIDI.conversion_constants import *
 from pyScore.util.range_checking import *
 from midi_codes import *
@@ -47,7 +47,7 @@ class MidiXMLToMidi:
       def __init__(self):
          self.mode = "Delta"
          self.warnings = []
-         
+
    def convert(self, tree, stream):
       # NOTE: Only type 1 MIDI files are supported at this time
       state = self.State()
@@ -78,7 +78,7 @@ class MidiXMLToMidi:
          ticks_per_frame = int_range_check(tree.findtext("./TicksPerFrame"), 0, MAX_7_BIT,
                                            "<TicksPerFrame>", warnings)
          ticks_per_beat = chr(0x80 + ord(bin_var_number(-frame_rate)[-1])) + chr(ticks_per_frame)
-         
+
       state.mode = tree.findtext("./TimestampType")
 
       stream.write(''.join((
@@ -87,7 +87,7 @@ class MidiXMLToMidi:
          bin_number(midi_type, 2),
          bin_number(num_tracks, 2),
          ticks_per_beat)))
-   
+
    def make_tracks(self, tree, write, state):
       for track in tree.findall("./Track"):
          self.make_track(track, write, state)
@@ -201,13 +201,13 @@ class MidiXMLToMidi:
          write(chr(value))
 
    event_MonoMode = ModeEventByte(MONO_MODE_ON)
-         
+
    class MetaEventBytes:
       def __init__(self, code, length, maximum):
          self._code = code
          self._length = length
          self._maximum = maximum
-         
+
       def __call__(self, element, write, state):
          write(chr(META_EVENT))
          write(chr(self._code))
@@ -228,7 +228,7 @@ class MidiXMLToMidi:
          self._code = code
 
       def __call__(self, element, write, state):
-         if element.text is not None: 
+         if element.text is not None:
              write(chr(META_EVENT))
              write(chr(self._code))
              s = element.text.encode("ascii", "replace")
@@ -331,7 +331,7 @@ class MidiXMLToMidi:
          self._msb_val = msb_val
          self._lsb_val = lsb_val
          self._name = name
-      
+
       def __call__(self, element, write, state):
          number = int_range_check(element.get(self._name), 0, MAX_14_BIT,
                                   "<%s %s='x'>" % (element.tag, self.name), state.warnings)

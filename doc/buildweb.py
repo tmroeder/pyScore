@@ -3,7 +3,7 @@ Python Score tools
 
 This script builds the (very simple) website.
 
-Copyright (C) 2004 Michael Droettboom
+Copyright 2002-2008 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License

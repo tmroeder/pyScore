@@ -2,7 +2,7 @@
 pyScore
 =======
 
-Copyright 2004-2005 Michael Droettboom
+Copyright 2004-2008 Michael Droettboom and Stephen Sinclair
 
 pyScore is a set of Python-based tools for working with symbolic music
 notation.
@@ -30,6 +30,7 @@ The current features are:
 - Guido_ normalization
 - Extracting absolute times for Guido_ events
 - Guido_ to MusicXML_ conversion
+- Guido_ to LilyPond_ conversion (thanks to Stephen Sinclair)
 - MusicXML_ to Guido_ conversion
 - MusicXML_ to MidiXML_ to MIDI_ conversion (at the moment this is
   very "literal", but works for many things)
@@ -41,6 +42,7 @@ The current features are:
 .. _MusicXML: http://www.musicxml.com/
 .. _MidiXML: http://www.recordare.com/dtds/midixml.html
 .. _MIDI: http://www.midi.org/
+.. _LilyPond: http://www.lilypond.org/
 
 The various conversions are illustrated in the following graph.  Each
 arrow represents a direct conversion.  The dashed arrows indicate that
@@ -70,7 +72,7 @@ Test results
 ============
 
 There are some automatically generated `test results`__ that
-demonstrate the abilities of the system.  
+demonstrate the abilities of the system.
 
 It is not expected at this point that the output is entirely correct.
 If you see a long URL displayed beginning with
@@ -121,6 +123,10 @@ This package includes local copies of other third-party packages, so
 that it can be installed on a vanilla Python system.  I'd like to
 thank these uber-programmers for their great work, without which
 writing pyScore would have been much more difficult:
+
+- Stephen Sinclair's `notes`__ about extending pyScore to support LilyPond
+
+.. __: http://www.music.mcgill.ca/~sinclair/content/lilypond_for_pyscore
 
 - MusicXML and MidiXML `DTDs and XSLTs`__ by Michael Good
 

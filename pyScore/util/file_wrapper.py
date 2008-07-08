@@ -1,7 +1,7 @@
 """
 A general wrapper around files for compression and en/decoding support
 
-Copyright (C) 2004 Michael Droettboom
+Copyright (c) 2002-2008 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License

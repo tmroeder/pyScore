@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+from pyScore.util.script_helpers import *
+from pyScore.MusicXML.validate import validate
+import pyScore.Lilypond.convert
+import pyScore.MusicXML.convert
+
+import sys
+
+convert(
+   [pyScore.Lilypond.convert, pyScore.MusicXML.convert],
+   Format("MusicXML", "xml", "MusicXML_file"),
+   Format("Lilypond", "ly", "Lilypond_file"))

@@ -2,7 +2,7 @@
 Miscellaneous data structures
 Python GUIDO tools
 
-Copyright (C) 2002 Michael Droettboom
+Copyright (c) 2002-2008 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -13,7 +13,7 @@ Copyright (C) 2002 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -32,7 +32,7 @@ class SortedListSet(object):
                 continue
             result.append(elem)
         self.data = result
-        
+
     def __repr__(self):
         return 'Set(' + repr(self.data) + ')'
 
@@ -52,7 +52,7 @@ class SortedListSet(object):
         i = bisect_left(self.data, elem, 0)
         if i<len(data) and data[i] == elem:
             del data[i]
- 
+
     def _getotherdata(other):
         if not isinstance(other, Set):
             other = Set(other)
@@ -66,7 +66,7 @@ class SortedListSet(object):
         i = j = 0
         x = self.data
         y = Set._getotherdata(other)
-        result = Set([])        
+        result = Set([])
         append = result.data.append
         extend = result.data.extend
         try:
@@ -92,7 +92,7 @@ class SortedListSet(object):
         i = j = 0
         x = self.data
         y = Set._getotherdata(other)
-        result = Set([])        
+        result = Set([])
         append = result.data.append
         try:
             while 1:
@@ -107,12 +107,12 @@ class SortedListSet(object):
         except IndexError:
             pass
         return result
-    
+
     def difference(self, other, find=bisect_left):
         i = j = 0
         x = self.data
         y = Set._getotherdata(other)
-        result = Set([])        
+        result = Set([])
         extend = result.data.extend
         try:
             while 1:

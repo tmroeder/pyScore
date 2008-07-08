@@ -2,7 +2,7 @@
 Helper class for building GUIDO trees
 Python GUIDO tools
 
-Copyright (C) 2002 Michael Droettboom
+Copyright (c) 2002-2008 Michael Droettboom
 """
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -13,7 +13,7 @@ Copyright (C) 2002 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -71,7 +71,7 @@ class GuidoTreeBuilder:
       self._registered_tags = {}
       for t in tags:
          self.register_module_of_tags(t)
-        
+
    def register_module_of_tags(self, t):
       if not type(t) == DictType:
          t = t.__dict__
@@ -161,7 +161,7 @@ class GuidoTreeBuilder:
       self.add(core.Barline(pos=pos))
 
    # low-level interface
-      
+
    def add(self, obj):
       """Adds an object to the current part."""
       self.current_collection.append(obj)
@@ -187,7 +187,7 @@ class GuidoTreeBuilder:
    def add_active_tag(self, tag_obj):
       assert isinstance(tag_obj, core.TAG)
       self._active_tags.append(tag_obj)
-      
+
    def remove_active_tag(self, tag_obj):
       assert isinstance(tag_obj, core.TAG)
       active_tags = self._active_tags
@@ -264,7 +264,7 @@ class GuidoTreeBuilder:
                pos=pos)
          else:
             raise ValueError("'%s' is not a valid tag." % name)
-            
+
       if id != None:
          try:
             id = int(id)

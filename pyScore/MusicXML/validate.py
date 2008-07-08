@@ -2,7 +2,7 @@
 Validates a given XML filename against the MusicXML DTD
 Python GUIDO tools
 
-Copyright (C) 2004 Michael Droettboom
+Copyright (c) 2002-2008 Michael Droettboom
 """
 
 ## This program is free software; you can redistribute it and/or
@@ -14,7 +14,7 @@ Copyright (C) 2004 Michael Droettboom
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
- 
+
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -29,4 +29,4 @@ def validate(filename):
    val = system("xmllint --dtdvalid %s --noout %s" % (join(dir, "DTD", "partwise.dtd"), filename))
    print "XMLLINT returned:", val
    return val
-   
+

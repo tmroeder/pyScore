@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+
+from pyScore.util.script_helpers import *
+import pyScore.Guido.convert
+import pyScore.Lilypond.convert
+
+import sys
+
+convert(
+   [pyScore.Guido.convert, pyScore.Lilypond.convert],
+   Format("Guido", "gmn", "Guido_file"),
+   Format("Lilypond", "ly", "Lilypond_file"))
