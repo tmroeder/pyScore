@@ -227,7 +227,7 @@ factor_lshift(PyObject *aa, long shift)
 }
 
 static PyObject *
-factor_muladd1(PyObject *aa, wdigit n, twodigits carry)
+factor_muladd1(PyObject *aa, sdigit n, twodigits carry)
 {
      int size_a = ABS(SIZE(aa));
      PyLongObject *a = (PyLongObject *)aa;
